@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>SECRET ENGLISH COUNCIL ADVANCED</title>
+  <style>
+    body {
+      background-color: black;
+      color: white;
+      font-family: monospace;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      margin: 0;
+    }
+    #terminal {
+      width: 600px;
+      max-width: 90%;
+      border: 2px solid white;
+      padding: 20px;
+      background-color: #000;
+      box-shadow: 0 0 10px white;
+    }
+    #output {
+      white-space: pre-wrap;
+      margin-bottom: 10px;
+      min-height: 100px;
+    }
+    input {
+      width: 100%;
+      background: black;
+      border: none;
+      color: white;
+      font-family: monospace;
+      font-size: 16px;
+      outline: none;
+    }
+  </style>
+</head>
+<body>
+  <div id="terminal">
+    <div id="output">Enter password:</div>
+    <input type="password" id="input" autofocus />
+  </div>
+
+  <script>
+    const correctPassword = "@2#1#3$1#1%1#1^3%2(2*1@2^2#3(1&1^3#3*1(2!2#2$3!2^3#3#1#2"; // 🔑 your password
+
+    const dictionaryData = `
+📖 SECA Dictionary
+------------------------
+KuroSaru - (noun) A Japanese-inspired name meaning “Black Monkey”; from kuro (黒, “black”) + saru (猿, “monkey”)
+
+Kokujin - (noun) Japanese term meaning “black person”; from koku (黒, “black”) + jin (人, “person”) EDITORS NOTE: I expected this means the n-word but I was wrong
+
+Janna - (slang'd-name) Someone fat (yeah that's just it)
+
+Kevin - (slang'd-name) Kevin or TS; slang term meaning "something bad," popularized on TikTok in mid-April 2025
+
+Owen - (slang'd-name) Alongside other names-turned-slang-terms, including "Owen," meaning "something good"
+
+Pica - (vulgar) A crude insult in Slovak, roughly equivalent to “bitch”; refers to a woman in an offensive way.
+`;
+
+    const input = document.getElementById("input");
+    const output = document.getElementById("output");
+
+    input.addEventListener("keydown", function(e) {
+      if (e.key === "Enter") {
+        if (input.value === correctPassword) {
+          output.textContent = "Access granted.\n\n" + dictionaryData;
+          input.style.display = "none";
+        } else {
+          output.textContent = "Access denied. Try again:";
+          input.value = "";
+        }
+      }
+    });
+  </script>
+</body>
+</html>
