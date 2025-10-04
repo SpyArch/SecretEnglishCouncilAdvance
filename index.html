@@ -16,10 +16,10 @@ body {
   color: white;
 }
 
-/* Container (bean -> square) */
+/* Container morphs from bean → square */
 #container {
-  width: 280px;       /* bean width */
-  height: 50px;       /* bean height */
+  width: 280px;        /* bean width */
+  height: 50px;        /* bean height */
   background: black;
   border: 2px solid white;
   border-radius: 25px; /* capsule */
@@ -28,54 +28,45 @@ body {
   justify-content: center;
   transition: all 0.8s ease-in-out;
   overflow: hidden;
-  position: relative;
   flex-direction: column;
-  padding: 0 10px;
+  position: relative;
 }
 
-/* Morph target: square */
+/* Square state */
 #container.square {
   width: 600px;
   height: 300px;
-  border-radius: 8px; /* sharp corners */
-  padding: 20px;
+  border-radius: 8px;
+  padding: 10px;       /* reduce to avoid extra space */
   justify-content: flex-start;
 }
 
 /* Password input */
 #password-input {
-  width: 100%;
+  width: 180px;
   background: transparent;
   border: none;
   color: white;
   font-family: monospace;
   font-size: 18px;
   outline: none;
-  caret-color: white;   /* native blinking caret */
+  caret-color: white;   /* native blinking | */
   text-align: center;
   transition: opacity 0.5s ease;
   z-index: 2;
 }
 
-/* Dictionary box */
+/* Dictionary */
 #dictionary {
   color: white;
   font-size: 16px;
   white-space: pre-wrap;
   opacity: 0;
-  margin-top: 0;
+  margin: 0;
   overflow-y: auto;
   flex: 1;
   width: 100%;
-}
-
-/* Scrollbar only if needed */
-#dictionary::-webkit-scrollbar {
-  width: 6px;
-}
-#dictionary::-webkit-scrollbar-thumb {
-  background-color: white;
-  border-radius: 3px;
+  line-height: 1.2;
 }
 </style>
 </head>
@@ -104,25 +95,21 @@ const input = document.getElementById("password-input");
 const dict = document.getElementById("dictionary");
 
 input.addEventListener("keydown", e => {
-  if (e.key === "Enter") {
-    if (input.value === correctPassword) {
+  if(e.key === "Enter"){
+    if(input.value === correctPassword){
       container.classList.add("square");
-
-      // fade out input
       input.style.opacity = 0;
 
-      // wait for morph animation to finish
       setTimeout(() => {
-        let i = 0;
         dict.style.opacity = 1;
-        dict.textContent = "";
-        (function typeDict() {
-          if (i < dictionaryData.length) {
+        let i = 0;
+        (function typeDict(){
+          if(i < dictionaryData.length){
             dict.textContent += dictionaryData[i++];
             setTimeout(typeDict, 15);
           }
         })();
-      }, 800); // match transition duration
+      }, 800); // matches container morph duration
     } else {
       input.value = "";
       alert("Access denied. Try again.");
