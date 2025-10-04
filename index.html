@@ -28,20 +28,19 @@
       transition: all 0.8s ease-in-out;
       overflow: hidden;
       position: relative;
-      flex-direction: column;
     }
 
-    /* Morph target */
+    /* Square target */
     #container.square {
       width: 600px;
       height: 300px;
       border-radius: 8px;
-      padding: 12px 20px;
+      padding: 0;                 /* no extra padding */
+      align-items: flex-start;    /* dictionary aligns top */
       justify-content: flex-start;
-      align-items: flex-start;
     }
 
-    /* Password input */
+    /* Password input centered */
     #password-input {
       width: 180px;
       background: transparent;
@@ -52,8 +51,8 @@
       outline: none;
       caret-color: white;
       text-align: center;
-      transition: opacity 0.5s ease;
-      z-index: 2;
+      transition: opacity 0.4s ease;
+      position: absolute; /* perfect centering */
     }
 
     /* Dictionary */
@@ -62,10 +61,13 @@
       font-size: 16px;
       white-space: pre-wrap;
       opacity: 0;
-      margin-top: 0;           /* remove forehead gap */
+      margin: 0;           /* no forehead */
+      padding: 10px;       /* small breathing room */
       overflow-y: auto;
       flex: 1;
-      z-index: 1;
+      width: 100%;
+      height: 100%;
+      box-sizing: border-box;
     }
 
     /* Hide scrollbar unless needed */
@@ -104,10 +106,11 @@ Pica - (vulgar) Slovak insult, roughly equivalent to “bitch”
       if(input.value === correctPassword){
         container.classList.add("square");
 
-        // fade out input
+        // fade out + then remove input
         input.style.opacity = 0;
+        setTimeout(() => input.style.display = "none", 400);
 
-        // wait for morph to finish
+        // wait for morph then type dictionary
         setTimeout(() => {
           let i = 0;
           dict.style.opacity = 1;
