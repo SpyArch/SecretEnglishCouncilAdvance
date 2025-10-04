@@ -17,8 +17,8 @@
     }
 
     #container {
-      width: 280px;       /* bean width */
-      height: 50px;       /* bean height */
+      width: 280px;        /* bean width */
+      height: 50px;        /* bean height */
       background: black;
       border: 2px solid white;
       border-radius: 25px; /* capsule look */
@@ -31,12 +31,12 @@
       flex-direction: column;
     }
 
-    /* Square target state */
+    /* Morph target */
     #container.square {
       width: 600px;
       height: 300px;
-      border-radius: 8px; /* sharp corners */
-      padding: 20px;
+      border-radius: 8px;
+      padding: 12px 20px;
       justify-content: flex-start;
       align-items: flex-start;
     }
@@ -50,31 +50,35 @@
       font-family: monospace;
       font-size: 18px;
       outline: none;
-      caret-color: white;   /* native blinking caret */
+      caret-color: white;
       text-align: center;
       transition: opacity 0.5s ease;
       z-index: 2;
     }
 
+    /* Dictionary */
     #dictionary {
       color: white;
       font-size: 16px;
       white-space: pre-wrap;
       opacity: 0;
-      margin-top: 0;          /* remove forehead gap */
-      overflow: hidden;       /* hide scrollbars completely */
+      margin-top: 0;           /* remove forehead gap */
+      overflow-y: auto;
       flex: 1;
-      width: 100%;
       z-index: 1;
+    }
+
+    /* Hide scrollbar unless needed */
+    #dictionary::-webkit-scrollbar {
+      width: 0;
+      height: 0;
     }
   </style>
 </head>
 <body>
 
 <div id="container">
-  <div style="display:flex; align-items:center;">
-    <input type="password" id="password-input" autofocus>
-  </div>
+  <input type="password" id="password-input" autofocus>
   <div id="dictionary"></div>
 </div>
 
