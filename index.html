@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="utf-8" />
+<meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1" />
 <title>Secret English Council — Private Dictionary</title>
 <style>
@@ -9,37 +9,36 @@
   html,body{height:100%;margin:0;background:var(--bg);color:var(--fg);font-family:monospace}
   .wrap{height:100%;display:flex;align-items:center;justify-content:center;padding:20px}
 
-  /* container: starts as bean (capsule), morphs into square */
+  /* container: bean -> square morph */
   #container{
     width:280px;
     height:50px;
     background:var(--bg);
     border:2px solid var(--fg);
-    border-radius:28px; /* pill */
+    border-radius:28px;
     display:flex;
     align-items:center;
     justify-content:center;
-    transition:
-      width 0.75s cubic-bezier(.22,1,.36,1),
-      height 0.75s cubic-bezier(.22,1,.36,1),
-      border-radius 0.6s cubic-bezier(.22,1,.36,1),
-      padding 0.4s ease;
+    transition: width 0.75s cubic-bezier(.22,1,.36,1),
+                height 0.75s cubic-bezier(.22,1,.36,1),
+                border-radius 0.6s cubic-bezier(.22,1,.36,1),
+                padding 0.4s ease;
     overflow:hidden;
     position:relative;
     box-sizing:border-box;
+    flex-direction:column;
   }
 
-  /* target square */
   #container.square{
     width:620px;
     height:360px;
-    border-radius:8px;       /* sharp corners */
-    padding:18px;
-    align-items:flex-start;
+    border-radius:8px;
+    padding:0;
     justify-content:flex-start;
+    align-items:flex-start;
   }
 
-  /* input — centered and caret perfectly aligned */
+  /* input field */
   #password-input {
     width:200px;
     background:transparent;
@@ -49,19 +48,16 @@
     outline:0;
     caret-color:var(--fg);
     text-align:center;
-    line-height:50px;         /* centers the caret vertically in the 50px bean */
-    padding:0;
-    margin:0;
-    box-sizing:border-box;
-    transition:opacity .35s ease;
-    position:relative;
+    line-height:50px; /* centers caret in bean */
+    transition:opacity .35s ease, line-height 0.5s ease;
     z-index:2;
   }
 
-  /* When container expands we keep input small and centered while it fades */
-  #container.square #password-input{ position:relative; top:0; left:0; line-height:22px; }
+  #container.square #password-input{
+    line-height:1.2em;
+  }
 
-  /* dictionary area inside the square */
+  /* dictionary content */
   #dictionary{
     opacity:0;
     width:100%;
@@ -71,22 +67,15 @@
     background:transparent;
     font-size:15.5px;
     white-space:pre-wrap;
-    overflow:auto;            /* scrollbar only when needed */
-    padding:6px 2px 2px 2px;  /* minimal top padding to remove 'forehead' while giving tiny breathing room */
-    -webkit-overflow-scrolling:touch;
+    overflow:auto;
+    padding:12px; /* minimal padding so no forehead */
+    margin:0;
   }
-  /* hide thin scrollbar visual when not needed (webkit) */
-  #dictionary::-webkit-scrollbar{width:8px}
-  #dictionary::-webkit-scrollbar-thumb{background:rgba(255,255,255,0.08);border-radius:4px}
-  #dictionary::-webkit-scrollbar-track{background:transparent}
 
-  /* small visual hint for wrong password (temporary placeholder change) */
-  .hint-fail { animation: failFlash .9s ease; }
-  @keyframes failFlash {
-    0%{outline:2px solid rgba(255,0,0,0.0)}
-    40%{outline:2px solid rgba(255,0,0,0.9)}
-    100%{outline:2px solid rgba(255,0,0,0.0)}
-  }
+  /* hide scrollbar unless needed */
+  #dictionary::-webkit-scrollbar{width:6px}
+  #dictionary::-webkit-scrollbar-thumb{background:rgba(255,255,255,0.08);border-radius:3px}
+  #dictionary::-webkit-scrollbar-track{background:transparent}
 </style>
 </head>
 <body>
@@ -98,12 +87,7 @@
   </div>
 
 <script>
-/* === OLD PASSWORD PLAN RESTORED ===
-   The real (hard-coded) password is below (you asked to restore it).
-   NOTE: this means anyone who views source can read it. Keep repo private if that matters.
-*/
 const correctPassword = "@2#1#3$1#1%1#1^3%2(2*1@2^2#3(1&1^3#3*1(2!2#2$3!2^3#3#1#2";
-
 const dictionaryData = `📖 Private Dictionary
 ------------------------
 KuroSaru - (noun) A Japanese-inspired name meaning “Black Monkey”
@@ -114,60 +98,39 @@ Owen - (slang'd-name) meaning "something good"
 Pica - (vulgar) Slovak insult, roughly equivalent to “bitch”
 `;
 
-/* DOM */
 const container = document.getElementById('container');
 const input = document.getElementById('password-input');
 const dict = document.getElementById('dictionary');
 
-/* Utility: smooth typewriter */
-function typeWriter(el, text, speed=14){
-  el.textContent = "";
-  let i = 0;
+function typeWriter(el,text,speed=14){
+  el.textContent="";
+  let i=0;
   (function step(){
-    if (i < text.length){ el.textContent += text[i++]; setTimeout(step, speed); }
+    if(i<text.length){ el.textContent+=text[i++]; setTimeout(step,speed);}
   })();
 }
 
-/* Focus input initially and keep caret centered */
 input.focus();
 
-/* Handle Enter */
-input.addEventListener('keydown', (e) => {
-  if (e.key !== 'Enter') return;
-  const attempt = input.value;
-  if (attempt === correctPassword) {
-    // success: morph the bean into square
+input.addEventListener('keydown',(e)=>{
+  if(e.key!=='Enter')return;
+  if(input.value===correctPassword){
     container.classList.add('square');
-
-    // fade out the input smoothly (keeps caret visible briefly during morph)
-    input.style.opacity = 0;
-    // remove from layout after fade completes to prevent ghost caret
-    setTimeout(()=> { input.style.display = 'none'; }, 420);
-
-    // show dictionary after morph completes
-    setTimeout(()=> {
-      dict.style.opacity = 1;
+    input.style.opacity=0;
+    setTimeout(()=>{ input.style.display='none'; },420);
+    setTimeout(()=>{
+      dict.style.opacity=1;
       dict.setAttribute('aria-hidden','false');
-      // show dictionary content with typewriter
-      typeWriter(dict, dictionaryData, 14);
-      // give keyboard focus to the dictionary container for accessibility
-      dict.tabIndex = -1;
-      dict.focus();
-    }, 820);
-
-  } else {
-    // fail: clear input, show quick inline feedback
-    input.value = "";
-    input.placeholder = "Access denied";
-    container.classList.add('hint-fail');
-    setTimeout(()=> { container.classList.remove('hint-fail'); input.placeholder = ""; input.focus(); }, 800);
+      typeWriter(dict,dictionaryData,14);
+    },820);
+  }else{
+    input.value="";
+    input.placeholder="Access denied";
+    setTimeout(()=>{input.placeholder="";input.focus();},800);
   }
 });
 
-/* Accessibility: allow clicking container to focus input if visible */
-container.addEventListener('click', (ev) => {
-  if (input.style.display !== 'none') input.focus();
-});
+container.addEventListener('click',()=>{ if(input.style.display!=='none') input.focus(); });
 </script>
 </body>
 </html>
