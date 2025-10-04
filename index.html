@@ -6,43 +6,63 @@
 <title>Private Dictionary</title>
 <style>
 body {
-  background-color: black;
-  color: white;
-  font-family: monospace;
+  margin: 0;
+  height: 100vh;
   display: flex;
   justify-content: center;
   align-items: center;
-  height: 100vh;
-  margin: 0;
+  background-color: black;
+  font-family: monospace;
+  color: white;
 }
 
-/* Centered input container */
+/* Password "bean" input container */
 .input-container {
+  position: relative;
   width: 300px;
 }
 
 .input-container input {
   width: 100%;
-  padding: 12px 14px;
+  padding: 12px 16px;
   font-size: 18px;
   background: black;
   color: white;
   border: 2px solid white; /* white outline */
-  border-radius: 6px;
+  border-radius: 25px; /* bean shape */
   outline: none;
   caret-color: white;
+  transition: border-color 0.3s, box-shadow 0.3s;
 }
 
-/* White box for dictionary */
+/* Apple-style hover/focus */
+.input-container input:hover,
+.input-container input:focus {
+  border-color: white;
+  box-shadow: 0 0 0 2px rgba(255,255,255,0.2);
+}
+
+/* Blinking caret (pseudo-terminal style) */
+.input-container input::after {
+  content: '|';
+  display: inline;
+  animation: blink 1s step-start infinite;
+}
+
+@keyframes blink {
+  50% { opacity: 0; }
+}
+
+/* Dictionary box */
 #dictionary {
   display: none;
   margin-top: 20px;
-  background: white;
-  color: black;
+  background: black; /* black inside */
+  color: white;
   padding: 20px;
   width: 600px;
   max-width: 90%;
-  border: 2px solid white; /* white outline, no glow */
+  border: 2px solid white; /* white outline */
   border-radius: 8px;
   white-space: pre-wrap;
   font-size: 16px;
@@ -50,6 +70,7 @@ body {
   transform: translateY(-10px);
   transition: opacity 0.3s ease, transform 0.3s ease;
 }
+
 #dictionary.show {
   opacity: 1;
   transform: translateY(0);
