@@ -40,7 +40,7 @@
       justify-content: flex-start;
     }
 
-    /* Password input fixed size */
+    /* Password input */
     #password-input {
       width: 180px;
       background: transparent;
@@ -49,23 +49,10 @@
       font-family: monospace;
       font-size: 18px;
       outline: none;
-      caret-color: white;
+      caret-color: white;  /* make sure cursor is white and visible */
       text-align: center;
       transition: opacity 0.5s ease;
       z-index: 2;
-    }
-
-    .caret {
-      width: 10px;
-      height: 20px;
-      background-color: white;
-      animation: blink 1s steps(1) infinite;
-      margin-left: 5px;
-      transition: opacity 0.5s ease;
-    }
-
-    @keyframes blink {
-      50% { background-color: transparent; }
     }
 
     #dictionary {
@@ -85,7 +72,6 @@
 <div id="container">
   <div style="display:flex; align-items:center;">
     <input type="password" id="password-input" autofocus>
-    <span class="caret"></span>
   </div>
   <div id="dictionary"></div>
 </div>
@@ -106,16 +92,14 @@ Pica - (vulgar) Slovak insult, roughly equivalent to “bitch”
   const container = document.getElementById("container");
   const input = document.getElementById("password-input");
   const dict = document.getElementById("dictionary");
-  const caret = document.querySelector(".caret");
 
   input.addEventListener("keydown", e => {
     if(e.key === "Enter"){
       if(input.value === correctPassword){
         container.classList.add("square");
 
-        // fade out input + caret
+        // fade out input
         input.style.opacity = 0;
-        caret.style.opacity = 0;
 
         // wait for morph to finish
         setTimeout(() => {
