@@ -17,11 +17,11 @@
     }
 
     #container {
-      width: 280px;       
-      height: 50px;       
+      width: 280px;
+      height: 50px;
       background: black;
       border: 2px solid white;
-      border-radius: 25px; 
+      border-radius: 25px;
       display: flex;
       align-items: center;
       justify-content: center;
@@ -31,16 +31,14 @@
       flex-direction: column;
     }
 
-    /* Morph into square */
     #container.square {
       width: 600px;
       height: 300px;
       border-radius: 8px;
-      padding: 0; /* remove forehead */
+      padding: 20px;
       justify-content: flex-start;
     }
 
-    /* Password input */
     #password-input {
       width: 180px;
       background: transparent;
@@ -49,7 +47,7 @@
       font-family: monospace;
       font-size: 18px;
       outline: none;
-      caret-color: white;   
+      caret-color: white;
       text-align: center;
       transition: opacity 0.5s ease;
       z-index: 2;
@@ -60,9 +58,8 @@
       font-size: 16px;
       white-space: pre-wrap;
       opacity: 0;
-      margin: 0;            /* remove forehead */
-      padding: 10px;        /* controlled spacing */
-      overflow: hidden;     /* remove scrollbar */
+      margin-top: 10px;
+      overflow-y: auto;
       flex: 1;
       z-index: 1;
     }
@@ -71,13 +68,45 @@
 <body>
 
 <div id="container">
-  <input type="password" id="password-input" autofocus>
+  <div style="display:flex; align-items:center;">
+    <input type="password" id="password-input" autofocus>
+  </div>
   <div id="dictionary"></div>
 </div>
 
+<!-- CryptoJS for encryption/decryption -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.2.0/crypto-js.min.js"></script>
 <script>
-  const correctPassword = "@2#1#3$1#1%1#1^3%2(2*1@2^2#3(1&1^3#3*1(2!2#2$3!2^3#3#1#2";
-  const dictionaryData = `
+  const dataFile = "dictionary.data";   // your encrypted file
+  const secretKey = "mySecretKey123";   // 🔐 CHANGE THIS to your secret key
+
+  const container = document.getElementById("container");
+  const input = document.getElementById("password-input");
+  const dict = document.getElementById("dictionary");
+
+  async function getDecryptedPassword() {
+    try {
+      const res = await fetch(dataFile);
+      const encrypted = await res.text();
+      const bytes = CryptoJS.AES.decrypt(encrypted.trim(), secretKey);
+      return bytes.toString(CryptoJS.enc.Utf8);
+    } catch (err) {
+      console.error("Failed to load encrypted file:", err);
+      return "";
+    }
+  }
+
+  input.addEventListener("keydown", async e => {
+    if(e.key === "Enter"){
+      const correctPassword = await getDecryptedPassword();
+      if(input.value === correctPassword){
+        container.classList.add("square");
+        input.style.opacity = 0;
+
+        setTimeout(() => {
+          let i = 0;
+          dict.style.opacity = 1;
+          const dictionaryData = `
 📖 Private Dictionary
 ------------------------
 KuroSaru - (noun) A Japanese-inspired name meaning “Black Monkey”
@@ -86,21 +115,7 @@ Janna - (slang'd-name) Someone fat
 Kevin - (slang'd-name) Kevin is a slang term meaning "something bad"
 Owen - (slang'd-name) meaning "something good"
 Pica - (vulgar) Slovak insult, roughly equivalent to “bitch”
-  `;
-
-  const container = document.getElementById("container");
-  const input = document.getElementById("password-input");
-  const dict = document.getElementById("dictionary");
-
-  input.addEventListener("keydown", e => {
-    if (e.key === "Enter") {
-      if (input.value === correctPassword) {
-        container.classList.add("square");
-        input.style.opacity = 0;
-
-        setTimeout(() => {
-          let i = 0;
-          dict.style.opacity = 1;
+          `;
           (function typeDict(){
             if(i < dictionaryData.length){
               dict.textContent += dictionaryData[i++];
