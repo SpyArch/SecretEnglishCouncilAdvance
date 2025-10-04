@@ -18,30 +18,32 @@
 
     #container {
       width: 300px;
-      height: 60px;
-      padding: 12px 16px;
+      height: 50px;
       background: black;
       border: 2px solid white;
-      border-radius: 50px; /* bean */
+      border-radius: 25px; /* bean */
       display: flex;
       align-items: center;
       justify-content: center;
-      transition: all 0.8s cubic-bezier(0.68, -0.55, 0.27, 1.55); /* smoother morph */
+      transition: all 0.8s ease-in-out;
       overflow: hidden;
+      position: relative;
       flex-direction: column;
     }
 
+    /* Morph target */
     #container.square {
       width: 600px;
       height: 300px;
-      border-radius: 8px; /* square corners */
+      border-radius: 8px; /* sharp */
       padding: 20px;
       justify-content: flex-start;
     }
 
+    /* Password input fixed size */
     #password-input {
-      width: 100%;
-      background: black;
+      width: 180px;
+      background: transparent;
       border: none;
       color: white;
       font-family: monospace;
@@ -49,6 +51,22 @@
       outline: none;
       caret-color: white;
       text-align: center;
+      position: absolute;  /* stays centered */
+      transition: opacity 0.5s ease;
+    }
+
+    .caret {
+      width: 10px;
+      height: 20px;
+      background-color: white;
+      animation: blink 1s steps(1) infinite;
+      position: absolute;
+      right: calc(50% - 100px + 190px); /* align to input end */
+      transition: opacity 0.5s ease;
+    }
+
+    @keyframes blink {
+      50% { background-color: transparent; }
     }
 
     #dictionary {
@@ -59,6 +77,7 @@
       margin-top: 10px;
       overflow-y: auto;
       flex: 1;
+      z-index: 1;
     }
   </style>
 </head>
@@ -66,6 +85,7 @@
 
 <div id="container">
   <input type="password" id="password-input" autofocus>
+  <span class="caret"></span>
   <div id="dictionary"></div>
 </div>
 
@@ -80,29 +100,36 @@ Janna - (slang'd-name) Someone fat
 Kevin - (slang'd-name) Kevin is a slang term meaning "something bad"
 Owen - (slang'd-name) meaning "something good"
 Pica - (vulgar) Slovak insult, roughly equivalent to “bitch”
-`;
+  `;
 
   const container = document.getElementById("container");
   const input = document.getElementById("password-input");
   const dict = document.getElementById("dictionary");
+  const caret = document.querySelector(".caret");
 
   input.addEventListener("keydown", e => {
-    if (e.key === "Enter") {
-      if (input.value === correctPassword) {
+    if(e.key === "Enter"){
+      if(input.value === correctPassword){
         container.classList.add("square");
-        input.style.display = "none";
 
-        let i = 0;
-        dict.style.opacity = 1;
+        // fade out input + caret
+        input.style.opacity = 0;
+        caret.style.opacity = 0;
 
-        (function typeDict() {
-          if (i < dictionaryData.length) {
-            dict.innerHTML += dictionaryData[i++];
-            setTimeout(typeDict, 15);
-          }
-        })();
+        // wait for morph to finish
+        setTimeout(() => {
+          let i = 0;
+          dict.style.opacity = 1;
+          (function typeDict(){
+            if(i < dictionaryData.length){
+              dict.textContent += dictionaryData[i++];
+              setTimeout(typeDict, 15);
+            }
+          })();
+        }, 900);
       } else {
         input.value = "";
+        alert("Access denied. Try again.");
       }
     }
   });
