@@ -3,9 +3,8 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Private Dictionary</title>
+<title>Secret English Council Advance</title>
 <style>
-/* --- Body --- */
 body {
   margin: 0;
   height: 100vh;
@@ -17,33 +16,32 @@ body {
   color: white;
 }
 
-/* --- Password container --- */
-#password-container {
+/* Password bean → square */
+#container {
   width: 300px;
   padding: 12px 16px;
-  font-size: 18px;
   background: black;
   border: 2px solid white;
   border-radius: 25px; /* bean shape */
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  justify-content: center;
   transition: all 0.5s ease;
   overflow: hidden;
+  flex-direction: column;
 }
 
-#password-container.square {
+#container.square {
   width: 600px;
   height: 300px;
-  border-radius: 8px; /* square */
-  flex-direction: column;
+  border-radius: 8px; /* sharp corners */
   padding: 20px;
   justify-content: flex-start;
 }
 
-/* --- Input field --- */
+/* Input field */
 #password-input {
-  flex: 1;
+  width: 100%;
   background: black;
   border: none;
   color: white;
@@ -53,7 +51,7 @@ body {
   caret-color: white;
 }
 
-/* --- Blinking caret --- */
+/* Blinking caret */
 .caret {
   display: inline-block;
   width: 10px;
@@ -65,29 +63,27 @@ body {
   50% { background-color: transparent; }
 }
 
-/* --- Dictionary text --- */
+/* Dictionary */
 #dictionary {
   color: white;
   font-size: 16px;
   white-space: pre-wrap;
   opacity: 0;
   margin-top: 10px;
-  flex: 1;
   overflow-y: auto;
+  flex: 1;
 }
 </style>
 </head>
 <body>
 
-<div id="password-container">
-  <span id="prompt"></span>
+<div id="container">
   <input type="password" id="password-input" autofocus>
   <span class="caret"></span>
   <div id="dictionary"></div>
 </div>
 
 <script>
-// --- Password & dictionary ---
 const correctPassword = "@2#1#3$1#1%1#1^3%2(2*1@2^2#3(1&1^3#3*1(2!2#2$3!2^3#3#1#2";
 const dictionaryData = `
 📖 Private Dictionary
@@ -100,49 +96,4 @@ Owen - (slang'd-name) meaning "something good"
 Pica - (vulgar) Slovak insult, roughly equivalent to “bitch”
 `;
 
-// --- Type prompt animation ---
-const promptText = "Enter password:";
-const promptSpan = document.getElementById("prompt");
-let promptIndex = 0;
-
-(function typePrompt() {
-  if(promptIndex < promptText.length){
-    promptSpan.textContent += promptText[promptIndex++];
-    setTimeout(typePrompt, 100); // typing speed
-  }
-})();
-
-// --- Elements ---
-const input = document.getElementById("password-input");
-const container = document.getElementById("password-container");
-const dict = document.getElementById("dictionary");
-const caret = document.querySelector(".caret");
-
-// --- Handle Enter key ---
-input.addEventListener("keydown", e => {
-  if(e.key === "Enter"){
-    if(input.value === correctPassword){
-      // Morph bean → square
-      container.classList.add("square");
-      input.style.display = "none";
-      caret.style.display = "none";
-
-      // Smooth dictionary typing
-      let i = 0;
-      dict.style.opacity = 1;
-      (function typeDict(){
-        if(i < dictionaryData.length){
-          dict.textContent += dictionaryData[i++];
-          setTimeout(typeDict, 15); // faster typing
-        }
-      })();
-    } else {
-      input.value = "";
-      alert("Access denied. Try again.");
-    }
-  }
-});
-</script>
-
-</body>
-</html>
+const container = docu
