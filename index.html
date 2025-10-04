@@ -1,87 +1,57 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Private Dictionary</title>
-  <style>
-    body {
-      margin: 0;
-      height: 100vh;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      background-color: black;
-      font-family: monospace;
-      color: white;
-    }
-
-    #container {
-      width: 280px;
-      height: 50px;
-      background: black;
-      border: 2px solid white;
-      border-radius: 25px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      transition: all 0.8s ease-in-out;
-      overflow: hidden;
-      position: relative;
-      flex-direction: column;
-    }
-
-    #container.square {
-      width: 600px;
-      height: 300px;
-      border-radius: 8px;
-      padding: 20px;
-      justify-content: flex-start;
-    }
-
-    #password-input {
-      width: 180px;
-      background: transparent;
-      border: none;
-      color: white;
-      font-family: monospace;
-      font-size: 18px;
-      outline: none;
-      caret-color: white;
-      text-align: center;
-      transition: opacity 0.5s ease;
-      z-index: 2;
-    }
-
-    #dictionary {
-      color: white;
-      font-size: 16px;
-      white-space: pre-wrap;
-      opacity: 0;
-      margin-top: 10px;
-      overflow-y: auto;
-      flex: 1;
-      z-index: 1;
-    }
-  </style>
-  <!-- CryptoJS Library -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Private Dictionary</title>
+<style>
+  :root{--bg:#000;--fg:#fff}
+  html,body{height:100%;margin:0;background:var(--bg);color:var(--fg);font-family:monospace}
+  .wrap{height:100%;display:flex;align-items:center;justify-content:center}
+  #container{
+    width:280px;height:50px;background:#000;border:2px solid #fff;border-radius:25px;
+    display:flex;align-items:center;justify-content:center;transition:all .8s ease-in-out;overflow:hidden;position:relative;
+  }
+  #container.square{width:600px;height:300px;border-radius:8px;padding:20px;justify-content:flex-start;align-items:flex-start}
+  #password-input{
+    width:180px;background:transparent;border:0;color:var(--fg);font-size:18px;text-align:center;outline:none;
+    caret-color:var(--fg);line-height:50px;padding:0;margin:0;box-sizing:border-box;transition:opacity .4s ease;position:relative;z-index:2;
+  }
+  #dictionary{
+    opacity:0;color:var(--fg);font-size:15.5px;white-space:pre-wrap;margin:0;padding:8px;overflow:auto;width:100%;height:100%;box-sizing:border-box;
+  }
+  /* hide scrollbar unless necessary (webkit) */
+  #dictionary::-webkit-scrollbar{width:0;height:0}
+</style>
 </head>
 <body>
-
-<div id="container">
-  <div style="display:flex; align-items:center;">
-    <input type="password" id="password-input" autofocus>
+<div class="wrap">
+  <div id="container">
+    <input id="password-input" type="password" autocomplete="off" placeholder="" />
+    <div id="dictionary" aria-hidden="true"></div>
   </div>
-  <div id="dictionary"></div>
 </div>
 
+<!-- CryptoJS used for AES (browser) -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.2.0/crypto-js.min.js"></script>
 <script>
-  // Encrypted password (AES)
-  const encryptedPassword = "U2FsdGVkX1+Q9Ac2AQl9uz8T1ZqPZLx1XslPyF3eHvFYVKi7wHtE1olUO4bM7Q06";
-  const encryptionKey = "secret-key"; // change this to your own secret key
+/*
+  INSTRUCTIONS:
+  1) Put the AES ciphertext (single-line base64 string) you create into a repo file named `dictionary.data`
+     (or change `DATA_FILE` below to the filename you used).
+  2) Pick an encryption key (string). Use *that same key* when generating ciphertext.
+  3) Set ENCRYPTION_KEY below to that key.
+*/
 
-  const dictionaryData = `
+const DATA_FILE = "dictionary.data";   // file name in your repo (must be reachable from same folder)
+const ENCRYPTION_KEY = "REPLACE_WITH_YOUR_KEY"; // <-- CHANGE THIS to the same key you used to encrypt
+
+const container = document.getElementById("container");
+const input = document.getElementById("password-input");
+const dictEl = document.getElementById("dictionary");
+
+// fallback dictionary if decryption fails — not used, kept for dev
+const builtinDictionary = `
 📖 Private Dictionary
 ------------------------
 KuroSaru - (noun) A Japanese-inspired name meaning “Black Monkey”
@@ -90,43 +60,78 @@ Janna - (slang'd-name) Someone fat
 Kevin - (slang'd-name) Kevin is a slang term meaning "something bad"
 Owen - (slang'd-name) meaning "something good"
 Pica - (vulgar) Slovak insult, roughly equivalent to “bitch”
-  `;
+`;
 
-  const container = document.getElementById("container");
-  const input = document.getElementById("password-input");
-  const dict = document.getElementById("dictionary");
+// fetch and decrypt encrypted password stored in DATA_FILE
+async function loadEncryptedSecret() {
+  try {
+    const r = await fetch(DATA_FILE, {cache: "no-store"});
+    if (!r.ok) throw new Error("fetch failed");
+    const encrypted = (await r.text()).trim();
+    // decrypt AES (CryptoJS)
+    try {
+      const bytes = CryptoJS.AES.decrypt(encrypted, ENCRYPTION_KEY);
+      const plaintext = bytes.toString(CryptoJS.enc.Utf8);
+      return plaintext || null;
+    } catch (e) {
+      return null;
+    }
+  } catch (err) {
+    console.warn("Could not load encrypted file:", err);
+    return null;
+  }
+}
 
-  // Function to decrypt
-  function decryptPassword() {
-    const bytes = CryptoJS.AES.decrypt(encryptedPassword, encryptionKey);
-    return bytes.toString(CryptoJS.enc.Utf8);
+// typewriter effect (small, robust)
+function typeWriter(targetEl, text, speed=14) {
+  targetEl.textContent = "";
+  let i = 0;
+  (function step(){
+    if (i < text.length) {
+      targetEl.textContent += text[i++];
+      setTimeout(step, speed);
+    }
+  })();
+}
+
+input.addEventListener("keydown", async (e) => {
+  if (e.key !== "Enter") return;
+  const typed = input.value;
+  input.disabled = true;
+
+  // try to get encrypted password (decrypted plaintext)
+  const decrypted = await loadEncryptedSecret();
+
+  // if we couldn't load/decrypt, fall back to built-in password null => fail
+  if (!decrypted) {
+    // decrypt failure — don't reveal anything, clear and re-enable
+    input.value = "";
+    input.disabled = false;
+    alert("Unable to verify (encrypted file missing or wrong key).");
+    return;
   }
 
-  input.addEventListener("keydown", e => {
-    if (e.key === "Enter") {
-      const correctPassword = decryptPassword(); // runtime decryption
-      if (input.value === correctPassword) {
-        container.classList.add("square");
+  if (typed === decrypted) {
+    // success → morph
+    container.classList.add("square");
+    input.style.opacity = 0;
+    setTimeout(() => { input.style.display = "none"; }, 400);
 
-        input.style.opacity = 0; // hide input
-
-        setTimeout(() => {
-          let i = 0;
-          dict.style.opacity = 1;
-          (function typeDict() {
-            if (i < dictionaryData.length) {
-              dict.textContent += dictionaryData[i++];
-              setTimeout(typeDict, 15);
-            }
-          })();
-        }, 900);
-      } else {
-        input.value = "";
-        alert("Access denied. Try again.");
-      }
-    }
-  });
+    // show dictionary after morph completes
+    setTimeout(() => {
+      dictEl.style.opacity = 1;
+      // you can paste the dictionary text here or fetch it similarly from an encrypted file
+      const dictionaryData = `\n📖 Private Dictionary\n------------------------\nKuroSaru - (noun) A Japanese-inspired name meaning “Black Monkey”\nKokujin - (noun) Japanese term meaning “black person”\nJanna - (slang'd-name) Someone fat\nKevin - (slang'd-name) Kevin is a slang term meaning "something bad"\nOwen - (slang'd-name) meaning "something good"\nPica - (vulgar) Slovak insult, roughly equivalent to “bitch”\n`;
+      typeWriter(dictEl, dictionaryData, 14);
+    }, 850);
+  } else {
+    input.value = "";
+    input.disabled = false;
+    // simple inline feedback
+    input.placeholder = "Access denied";
+    setTimeout(()=> input.placeholder = "", 900);
+  }
+});
 </script>
-
 </body>
 </html>
