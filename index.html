@@ -16,13 +16,13 @@ body {
   color: white;
 }
 
-/* Container (bean -> square) */
+/* Container (bean → square) */
 #container {
-  width: 280px;
-  height: 50px;
+  width: 280px;           /* initial bean width */
+  height: 50px;           /* initial bean height */
   background: black;
   border: 2px solid white;
-  border-radius: 25px;
+  border-radius: 25px;    /* capsule shape */
   display: flex;
   align-items: center;
   justify-content: center;
@@ -32,11 +32,11 @@ body {
   padding: 0;
 }
 
-/* Square state */
+/* Square state after password */
 #container.square {
   width: 600px;
   height: 300px;
-  border-radius: 8px;
+  border-radius: 8px;     /* sharp corners */
   padding: 20px;
   justify-content: flex-start;
   align-items: flex-start;
@@ -51,7 +51,7 @@ body {
   font-family: monospace;
   font-size: 18px;
   outline: none;
-  caret-color: white;  /* native blinking caret */
+  caret-color: white;     /* native blinking caret */
   text-align: center;
   transition: opacity 0.5s ease;
   z-index: 2;
@@ -61,7 +61,7 @@ body {
 #dictionary {
   opacity: 0;
   flex: 1;
-  overflow-y: auto;
+  overflow-y: hidden;     /* removed scroll bar */
   white-space: pre-wrap;
   font-size: 16px;
   color: white;
@@ -69,7 +69,7 @@ body {
   margin: 0;
 }
 
-/* Smooth typing appearance */
+/* Typing effect (fade-in) */
 .fade-in {
   opacity: 1 !important;
 }
@@ -100,19 +100,22 @@ const input = document.getElementById("password-input");
 const dict = document.getElementById("dictionary");
 
 input.addEventListener("keydown", e => {
-  if(e.key === "Enter") {
-    if(input.value === correctPassword){
+  if (e.key === "Enter") {
+    if (input.value === correctPassword) {
+      // Morph container into square
       container.classList.add("square");
 
       // Fade out input
       input.style.opacity = 0;
 
-      // Wait for morph to finish
+      // Delay to allow morph animation
       setTimeout(() => {
         dict.style.opacity = 1;
         let i = 0;
-        (function typeDict(){
-          if(i < dictionaryData.length){
+
+        // Typing effect
+        (function typeDict() {
+          if (i < dictionaryData.length) {
             dict.textContent += dictionaryData[i++];
             setTimeout(typeDict, 15);
           }
