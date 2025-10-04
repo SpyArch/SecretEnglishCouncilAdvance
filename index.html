@@ -17,27 +17,25 @@
     }
 
     #container {
-      width: 280px;       /* bean width */
-      height: 50px;       /* bean height */
+      width: 280px;
+      height: 50px;
       background: black;
       border: 2px solid white;
-      border-radius: 25px; /* capsule look */
+      border-radius: 25px;       /* capsule */
       display: flex;
       align-items: center;
       justify-content: center;
       transition: all 0.8s ease-in-out;
       overflow: hidden;
       position: relative;
-      flex-direction: column;
     }
 
-    /* Square target state */
+    /* Square (only width grows, height fixed) */
     #container.square {
       width: 600px;
-      height: 300px;
-      border-radius: 8px; /* sharp corners */
-      padding: 20px;
+      border-radius: 8px;        /* sharp */
       justify-content: flex-start;
+      padding: 20px;
     }
 
     /* Password input */
@@ -49,12 +47,13 @@
       font-family: monospace;
       font-size: 18px;
       outline: none;
-      caret-color: white;   /* native blinking caret */
+      caret-color: white;
       text-align: center;
-      transition: opacity 0.5s ease;
-      z-index: 2;
+      line-height: 50px;         /* center caret */
+      transition: opacity 0.4s ease;
     }
 
+    /* Dictionary area */
     #dictionary {
       color: white;
       font-size: 16px;
@@ -63,16 +62,13 @@
       margin-top: 10px;
       overflow-y: auto;
       flex: 1;
-      z-index: 1;
     }
   </style>
 </head>
 <body>
 
 <div id="container">
-  <div style="display:flex; align-items:center;">
-    <input type="password" id="password-input" autofocus>
-  </div>
+  <input type="password" id="password-input" autofocus>
   <div id="dictionary"></div>
 </div>
 
@@ -94,17 +90,18 @@ Pica - (vulgar) Slovak insult, roughly equivalent to “bitch”
   const dict = document.getElementById("dictionary");
 
   input.addEventListener("keydown", e => {
-    if(e.key === "Enter"){
-      if(input.value === correctPassword){
+    if (e.key === "Enter") {
+      if (input.value === correctPassword) {
         container.classList.add("square");
 
-        // fade out input
+        // hide input
         input.style.opacity = 0;
+        setTimeout(() => input.style.display = "none", 400);
 
-        // wait for morph to finish
+        // wait for morph to finish, then type dictionary
         setTimeout(() => {
-          let i = 0;
           dict.style.opacity = 1;
+          let i = 0;
           (function typeDict(){
             if(i < dictionaryData.length){
               dict.textContent += dictionaryData[i++];
@@ -112,6 +109,7 @@ Pica - (vulgar) Slovak insult, roughly equivalent to “bitch”
             }
           })();
         }, 900);
+
       } else {
         input.value = "";
         alert("Access denied. Try again.");
