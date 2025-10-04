@@ -3,88 +3,76 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>Secret English Council — Private Dictionary</title>
+<title>Private Dictionary</title>
 <style>
-  :root{--bg:#000;--fg:#fff}
-  html,body{height:100%;margin:0;background:var(--bg);color:var(--fg);font-family:monospace}
-  .wrap{height:100%;display:flex;align-items:center;justify-content:center;padding:20px}
+:root{--bg:#000;--fg:#fff;}
+html,body{height:100%;margin:0;background:var(--bg);color:var(--fg);font-family:monospace;}
+.wrap{height:100%;display:flex;align-items:center;justify-content:center;padding:20px;}
 
-  /* container: bean -> square morph */
-  #container{
-    width:280px;
-    height:50px;
-    background:var(--bg);
-    border:2px solid var(--fg);
-    border-radius:28px;
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    transition: width 0.75s cubic-bezier(.22,1,.36,1),
-                height 0.75s cubic-bezier(.22,1,.36,1),
-                border-radius 0.6s cubic-bezier(.22,1,.36,1),
-                padding 0.4s ease;
-    overflow:hidden;
-    position:relative;
-    box-sizing:border-box;
-    flex-direction:column;
-  }
+#container{
+  width:280px;
+  height:50px;
+  background:var(--bg);
+  border:2px solid var(--fg);
+  border-radius:28px;
+  transition: width 0.75s cubic-bezier(.22,1,.36,1),
+              height 0.75s cubic-bezier(.22,1,.36,1),
+              border-radius 0.6s cubic-bezier(.22,1,.36,1);
+  overflow:hidden;
+  position:relative;
+}
 
-  #container.square{
-    width:620px;
-    height:360px;
-    border-radius:8px;
-    padding:0;
-    justify-content:flex-start;
-    align-items:flex-start;
-  }
+/* morph target */
+#container.square{
+  width:620px;
+  height:360px;
+  border-radius:8px;
+}
 
-  /* input field */
-  #password-input {
-    width:200px;
-    background:transparent;
-    border:0;
-    color:var(--fg);
-    font-size:18px;
-    outline:0;
-    caret-color:var(--fg);
-    text-align:center;
-    line-height:50px; /* centers caret in bean */
-    transition:opacity .35s ease, line-height 0.5s ease;
-    z-index:2;
-  }
+/* input */
+#password-input{
+  position:absolute;
+  top:50%;
+  left:50%;
+  transform:translate(-50%,-50%);
+  width:200px;
+  background:transparent;
+  border:0;
+  color:var(--fg);
+  font-size:18px;
+  outline:0;
+  caret-color:var(--fg);
+  text-align:center;
+  transition:opacity .35s ease;
+  z-index:2;
+}
 
-  #container.square #password-input{
-    line-height:1.2em;
-  }
+/* dictionary fills container */
+#dictionary{
+  position:absolute;
+  top:0; left:0; right:0; bottom:0;
+  color:var(--fg);
+  font-size:15.5px;
+  white-space:pre-wrap;
+  overflow:auto;
+  padding:12px;
+  box-sizing:border-box;
+  opacity:0;
+}
 
-  /* dictionary content */
-  #dictionary{
-    opacity:0;
-    width:100%;
-    height:100%;
-    box-sizing:border-box;
-    color:var(--fg);
-    background:transparent;
-    font-size:15.5px;
-    white-space:pre-wrap;
-    overflow:auto;
-    padding:12px; /* minimal padding so no forehead */
-    margin:0;
-  }
-
-  /* hide scrollbar unless needed */
-  #dictionary::-webkit-scrollbar{width:6px}
-  #dictionary::-webkit-scrollbar-thumb{background:rgba(255,255,255,0.08);border-radius:3px}
-  #dictionary::-webkit-scrollbar-track{background:transparent}
+/* hide scrollbar unless needed */
+#dictionary::-webkit-scrollbar{width:6px;}
+#dictionary::-webkit-scrollbar-thumb{background:rgba(255,255,255,0.08);border-radius:3px;}
+#dictionary::-webkit-scrollbar-track{background:transparent;}
 </style>
 </head>
 <body>
-  <div class="wrap">
-    <div id="container" role="application" aria-label="Private dictionary access">
-      <input id="password-input" type="password" autocomplete="off" aria-label="Password" placeholder="">
-      <div id="dictionary" aria-hidden="true"></div>
-    </div>
+<div class="wrap">
+  <div id="container" role="application" aria-label="Private dictionary access">
+    <input id="password-input" type="password" autocomplete="off" aria-label="Password" placeholder="">
+    <div id="dictionary" aria-hidden="true"></div>
   </div>
+</div>
 
 <script>
 const correctPassword = "@2#1#3$1#1%1#1^3%2(2*1@2^2#3(1&1^3#3*1(2!2#2$3!2^3#3#1#2";
