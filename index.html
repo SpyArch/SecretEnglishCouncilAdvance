@@ -16,13 +16,13 @@ body {
   color: white;
 }
 
-/* Container (bean → square) */
+/* Container (bean -> square) */
 #container {
-  width: 280px;           /* initial bean width */
-  height: 50px;           /* initial bean height */
+  width: 280px;
+  height: 50px;
   background: black;
   border: 2px solid white;
-  border-radius: 25px;    /* capsule shape */
+  border-radius: 25px; /* capsule look */
   display: flex;
   align-items: center;
   justify-content: center;
@@ -32,14 +32,14 @@ body {
   padding: 0;
 }
 
-/* Square state after password */
+/* Square state */
 #container.square {
   width: 600px;
   height: 300px;
-  border-radius: 8px;     /* sharp corners */
-  padding: 20px;
-  justify-content: flex-start;
+  border-radius: 8px;
+  padding: 10px; /* reduce padding to remove forehead */
   align-items: flex-start;
+  justify-content: flex-start;
 }
 
 /* Password input */
@@ -51,34 +51,34 @@ body {
   font-family: monospace;
   font-size: 18px;
   outline: none;
-  caret-color: white;     /* native blinking caret */
+  caret-color: white;  /* native blinking caret */
   text-align: center;
   transition: opacity 0.5s ease;
-  z-index: 2;
 }
 
 /* Dictionary */
 #dictionary {
-  opacity: 0;
-  flex: 1;
-  overflow-y: hidden;     /* removed scroll bar */
-  white-space: pre-wrap;
-  font-size: 16px;
+  display: none;
   color: white;
-  width: 100%;
+  font-size: 16px;
+  white-space: pre-wrap;
   margin: 0;
+  padding: 0;
+  width: 100%;
+  line-height: 1.3em; /* fixes gap above text */
+  overflow-y: auto;
 }
 
-/* Typing effect (fade-in) */
+/* Smooth typing appearance */
 .fade-in {
-  opacity: 1 !important;
+  display: block;
 }
 </style>
 </head>
 <body>
 
 <div id="container">
-  <input type="password" id="password-input" autofocus>
+  <input type="password" id="password-input" autofocus placeholder="">
   <div id="dictionary"></div>
 </div>
 
@@ -100,28 +100,25 @@ const input = document.getElementById("password-input");
 const dict = document.getElementById("dictionary");
 
 input.addEventListener("keydown", e => {
-  if (e.key === "Enter") {
-    if (input.value === correctPassword) {
-      // Morph container into square
+  if(e.key === "Enter") {
+    if(input.value === correctPassword){
+      // Morph bean into square
       container.classList.add("square");
 
       // Fade out input
       input.style.opacity = 0;
 
-      // Delay to allow morph animation
+      // Wait for morph to finish, then show dictionary
       setTimeout(() => {
-        dict.style.opacity = 1;
+        dict.style.display = "block";
         let i = 0;
-
-        // Typing effect
-        (function typeDict() {
-          if (i < dictionaryData.length) {
+        (function typeDict(){
+          if(i < dictionaryData.length){
             dict.textContent += dictionaryData[i++];
             setTimeout(typeDict, 15);
           }
         })();
       }, 900);
-
     } else {
       input.value = "";
       alert("Access denied. Try again.");
