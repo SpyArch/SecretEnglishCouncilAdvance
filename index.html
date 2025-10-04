@@ -2,96 +2,119 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Secret English Council Advance</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Private Dictionary</title>
   <style>
     body {
-      background: black;
       margin: 0;
       height: 100vh;
       display: flex;
       justify-content: center;
       align-items: center;
-      overflow: hidden; /* remove useless scroll */
+      background-color: black;
       font-family: monospace;
       color: white;
     }
 
-    .bean {
-      display: flex;
-      justify-content: center;
-      align-items: center;
+    #container {
+      width: 280px;       
+      height: 50px;       
       background: black;
       border: 2px solid white;
-      border-radius: 50px; /* start round like a bean */
-      width: 250px;
-      height: 50px;
-      transition: all 1s ease-in-out;
-      position: relative;
+      border-radius: 25px; 
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.8s ease-in-out;
       overflow: hidden;
+      position: relative;
+      flex-direction: column;
     }
 
-    .bean.square {
+    /* Morph into square */
+    #container.square {
       width: 600px;
-      height: 400px;
-      border-radius: 0; /* sharp corners */
+      height: 300px;
+      border-radius: 8px;
+      padding: 0; /* remove forehead */
+      justify-content: flex-start;
     }
 
-    .input {
+    /* Password input */
+    #password-input {
+      width: 180px;
       background: transparent;
       border: none;
-      outline: none;
       color: white;
+      font-family: monospace;
       font-size: 18px;
+      outline: none;
+      caret-color: white;   
       text-align: center;
-      caret-color: white;
-      width: 100%;
+      transition: opacity 0.5s ease;
+      z-index: 2;
     }
 
-    .hidden {
-      display: none;
-    }
-
-    .dictionary {
-      opacity: 0;
-      padding: 20px;
+    #dictionary {
+      color: white;
       font-size: 16px;
-      line-height: 1.5em;
-      text-align: left;
-      overflow-y: auto;
-      height: 100%;
-      box-sizing: border-box;
-      transition: opacity 1s ease-in-out;
-    }
-
-    .square .dictionary {
-      opacity: 1; /* fade in smoothly */
+      white-space: pre-wrap;
+      opacity: 0;
+      margin: 0;            /* remove forehead */
+      padding: 10px;        /* controlled spacing */
+      overflow: hidden;     /* remove scrollbar */
+      flex: 1;
+      z-index: 1;
     }
   </style>
 </head>
 <body>
-  <div class="bean" id="beanBox">
-    <input type="password" id="passwordInput" class="input" autofocus>
-    <div id="dictionary" class="dictionary hidden">
-      Welcome to the Secret English Council.<br>
-      This is your hidden dictionary.<br>
-      Type wisely and uncover secrets.
-    </div>
-  </div>
 
-  <script>
-    const input = document.getElementById("passwordInput");
-    const beanBox = document.getElementById("beanBox");
-    const dictionary = document.getElementById("dictionary");
+<div id="container">
+  <input type="password" id="password-input" autofocus>
+  <div id="dictionary"></div>
+</div>
 
-    input.addEventListener("keydown", (e) => {
-      if (e.key === "Enter") {
-        if (input.value === "secret") { // <-- your password
-          input.classList.add("hidden");
-          dictionary.classList.remove("hidden");
-          beanBox.classList.add("square");
-        }
+<script>
+  const correctPassword = "@2#1#3$1#1%1#1^3%2(2*1@2^2#3(1&1^3#3*1(2!2#2$3!2^3#3#1#2";
+  const dictionaryData = `
+📖 Private Dictionary
+------------------------
+KuroSaru - (noun) A Japanese-inspired name meaning “Black Monkey”
+Kokujin - (noun) Japanese term meaning “black person”
+Janna - (slang'd-name) Someone fat
+Kevin - (slang'd-name) Kevin is a slang term meaning "something bad"
+Owen - (slang'd-name) meaning "something good"
+Pica - (vulgar) Slovak insult, roughly equivalent to “bitch”
+  `;
+
+  const container = document.getElementById("container");
+  const input = document.getElementById("password-input");
+  const dict = document.getElementById("dictionary");
+
+  input.addEventListener("keydown", e => {
+    if (e.key === "Enter") {
+      if (input.value === correctPassword) {
+        container.classList.add("square");
+        input.style.opacity = 0;
+
+        setTimeout(() => {
+          let i = 0;
+          dict.style.opacity = 1;
+          (function typeDict(){
+            if(i < dictionaryData.length){
+              dict.textContent += dictionaryData[i++];
+              setTimeout(typeDict, 15);
+            }
+          })();
+        }, 900);
+      } else {
+        input.value = "";
+        alert("Access denied. Try again.");
       }
-    });
-  </script>
+    }
+  });
+</script>
+
 </body>
 </html>
