@@ -1,210 +1,423 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<title>Secret English Council Advance</title>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Private Dictionary — Black & White (Optimized)</title>
 <style>
-  body {
-    background:#000;
-    color:#0f0;
-    font-family:monospace;
-    margin:0; overflow:hidden;
+  /* Reset + base */
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{height:100%;background:#000;color:#fff;font-family:monospace; -webkit-font-smoothing:antialiased}
+  body{display:flex;align-items:center;justify-content:center;overflow:hidden}
+
+  /* CONTAINER: capsule -> rectangle */
+  #container{
+    width:320px;height:56px;border:2px solid #fff;border-radius:28px;
+    background:#000;display:flex;align-items:center;justify-content:center;
+    transition:width .52s cubic-bezier(.2,.9,.2,1),height .52s cubic-bezier(.2,.9,.2,1),border-radius .4s;
+    overflow:hidden;transform-origin:center;position:relative;
   }
-  #container {
-    width:0; height:0;
-    border-radius:50%;
-    background:#000;
-    position:fixed; top:50%; left:50%;
-    transform:translate(-50%,-50%);
-    overflow:hidden; color:#0f0;
-    transition:all 0.5s ease;
+
+  /* opening/closing subtle scale */
+  @keyframes hypr-open{from{transform:scale(.98);opacity:0}to{transform:scale(1);opacity:1}}
+  @keyframes hypr-close{from{transform:scale(1);opacity:1}to{transform:scale(.98);opacity:0}}
+
+  .anim-opening{animation:hypr-open .26s ease both}
+  .anim-closing{animation:hypr-close .22s ease both}
+
+  #container.open{width:88vw;max-width:980px;height:72vh;max-height:720px;border-radius:10px;padding:12px}
+
+  /* password capsule */
+  #pwSection{width:100%;padding:8px;display:flex;justify-content:center;align-items:center}
+  #password{
+    width:86%;background:transparent;border:none;outline:none;color:#fff;font-size:18px;text-align:center;caret-color:#fff;
+    padding:8px 10px;border-radius:6px;
   }
-  #container.open {
-    width:80vw; height:80vh; border-radius:8px;
+
+  /* shake animation for wrong password (applied to pwSection) */
+  @keyframes shake { 0% { transform: translateX(0) } 20% { transform: translateX(-8px) } 40% { transform: translateX(8px) } 60% { transform: translateX(-6px) } 80% { transform: translateX(6px) } 100% { transform: translateX(0) } }
+  .shake { animation: shake .45s ease; }
+
+  /* menu area */
+  #menuArea{display:none;width:100%;height:100%}
+  #container.open #menuArea{display:flex}
+
+  /* layout columns */
+  #leftCol{width:260px;max-width:34%;min-width:160px;border-right:2px solid #fff;padding-right:12px;display:flex;flex-direction:column;gap:6px;align-items:flex-start}
+  .left-item{padding:8px 6px;cursor:pointer;user-select:none;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .left-item.main-selected::before{content:"> ";margin-right:6px;color:#fff}
+
+  #rightCol{flex:1;padding-left:18px;padding-right:12px;overflow-y:auto;white-space:pre-wrap;font-size:15px;line-height:1.4;position:relative}
+  #rightCol::-webkit-scrollbar{height:8px;width:8px;background:transparent}
+  #rightCol::-webkit-scrollbar-thumb{background:rgba(255,255,255,0.06);border-radius:4px}
+  #rightCol{-ms-overflow-style:none;scrollbar-width:thin}
+
+  .detail-line{position:relative;padding:6px 0 6px 28px;cursor:pointer;user-select:none;color:#fff}
+  .detail-line.plain{padding-left:6px}
+
+  @media (max-width:520px){
+    #container.open{width:94vw;height:78vh;padding:8px}
+    #leftCol{width:40%;max-width:180px}
   }
-  #menuArea { display:none; width:100%; height:100%; padding:12px; }
-  #menuFlex { display:flex; height:100%; }
-  #leftCol { width:180px; border-right:1px solid #0f0; padding:6px; }
-  #rightCol {
-    flex:1;
-    padding-left:18px;
-    padding-right:12px; /* scrollbar fix */
-    overflow-y:auto;
-  }
-  .menu-item { cursor:pointer; margin:4px 0; }
-  .menu-item.selected { color:#ff0; }
-  .sub-item { margin-left:12px; }
-  .sub-item.selected { color:#ff0; }
-  .pwScreen { display:flex; flex-direction:column; align-items:center; justify-content:center; height:100vh; }
-  .hidden { display:none; }
-  #pwInput {
-    background:#000; color:#0f0; border:1px solid #0f0;
-    padding:6px; font-family:monospace; width:260px;
-  }
+
+  /* accessible focus */
+  .left-item:focus,.detail-line:focus{outline:1px dashed #fff;outline-offset:2px}
 </style>
 </head>
 <body>
-<div id="container">
-  <div id="menuArea">
-    <div id="menuFlex">
-      <div id="leftCol"></div>
-      <div id="rightCol"></div>
+  <div id="container" aria-live="polite">
+    <!-- password capsule -->
+    <div id="pwSection" aria-hidden="false">
+      <input id="password" type="password" placeholder="Enter password" autocomplete="off" aria-label="Password">
+    </div>
+
+    <!-- menu area (hidden until unlocked) -->
+    <div id="menuArea" aria-hidden="true" style="display:flex;width:100%;height:100%;">
+      <div id="leftCol" role="menu" aria-label="Main menu"></div>
+      <div id="rightCol" role="region" aria-label="Detail panel"></div>
     </div>
   </div>
-</div>
-
-<div id="pwPrompt" class="pwScreen">
-  <div>ENTER PASSWORD:</div>
-  <input type="password" id="pwInput">
-</div>
 
 <script>
-const container=document.getElementById("container");
-const menuArea=document.getElementById("menuArea");
-const leftCol=document.getElementById("leftCol");
-const rightCol=document.getElementById("rightCol");
-const pwPrompt=document.getElementById("pwPrompt");
-const pwInput=document.getElementById("pwInput");
+/* ================= CONFIG ================= */
+const CORRECT_PASSWORD = "@2#1#3$1#1%1#1^3%2(2*1@2^2#3(1&1^3#3*1(2!2#2$3!2^3#3#1#2";
 
-let menu=["BOUNTY","MEDIA","DICTIONARY","EXIT"];
-let submenus={
-  "MEDIA":["DISCORD","INSTAGRAM","ROBLOX"]
-};
-let selected=0;
-let inSub=false;
-let subSel=0;
-let activeMenu=null;
+/* Media links */
+const MEDIA = [
+  { name: "DISCORD", url: "https://discord.gg/Bz2z7hqeb" },
+  { name: "INSTAGRAM", url: "https://www.instagram.com/secreteng_counciladvanced/" },
+  { name: "ROBLOX", url: "https://www.roblox.com/share/g/35306961" }
+];
 
-function typeText(el,text,done){
-  el.textContent="";
-  let i=0;
-  function step(){
-    if(i<text.length){
-      el.textContent+=text[i];
-      i++;
-      setTimeout(step,30);
-    } else if(done) done();
+/* Bounties */
+const BOUNTIES = [
+  ["Name","Bounty"],
+  ["Janna", 2900000000],
+  ["Sabrina",2400000000],
+  ["Juan",400000000],
+  ["Angel",1700000000],
+  ["Aubrey",700000000]
+];
+
+/* Dictionary */
+const DICTIONARY_TEXT = `KuroSaru - (noun) A Japanese-inspired name meaning "Black Monkey"
+Kokujin - (noun) Japanese term meaning "black person"
+Airball - Filipino Starter Pack (also known as Feyleypenos)
+Gerald - Someone Black
+Janna - (slang'd-name) Someone fat
+Kevin - (slang'd-name) Kevin is a slang term meaning "something bad"
+Owen - (slang'd-name) meaning "something good"
+Pica - (vulgar) Slovak insult, roughly equivalent to "bitch"`;
+
+/* Main menu model */
+const MENU = [
+  { key:"BOUNTY", label:"BOUNTY" },
+  { key:"MEDIA", label:"MEDIA", submenu: MEDIA },
+  { key:"DICTIONARY", label:"DICTIONARY" },
+  { key:"EXIT", label:"EXIT" }
+];
+
+/* Konami (W W S S A D A D B A Enter) */
+const KONAMI = ["w","w","s","s","a","d","a","d","b","a","enter"];
+const RICKROLL = "https://www.youtube.com/watch?v=dQw4w9WgXcQ";
+/* ========================================== */
+
+/* DOM refs */
+const container = document.getElementById('container');
+const pwSection = document.getElementById('pwSection');
+const pwInput = document.getElementById('password');
+const menuArea = document.getElementById('menuArea');
+const leftCol = document.getElementById('leftCol');
+const rightCol = document.getElementById('rightCol');
+
+/* State */
+let mode = "locked";           // 'locked' | 'main' | 'sub'
+let selectedMenu = 0;
+let selectedDetail = 0;
+let konamiBuf = [];
+let lastRenderSig = "";
+let renderGeneration = 0;      // token to cancel typing tasks
+
+/* Helpers */
+function normalizeKey(e){
+  if(!e) return "";
+  if(e.key === "ArrowUp") return "w";
+  if(e.key === "ArrowDown") return "s";
+  if(e.key === "ArrowLeft") return "a";
+  if(e.key === "ArrowRight") return "d";
+  if(e.key === "Enter") return "enter";
+  return (""+e.key).toLowerCase();
+}
+function pushKonami(k){
+  konamiBuf.push(k);
+  if(konamiBuf.length > KONAMI.length) konamiBuf.shift();
+  if(konamiBuf.length === KONAMI.length && KONAMI.every((v,i)=>konamiBuf[i]===v)){
+    window.open(RICKROLL, "_blank");
+    konamiBuf = [];
   }
-  step();
+}
+function formatMoney(n){ try { return "$" + Number(n).toLocaleString("en-US"); } catch(e) { return "$"+n; } }
+
+/* Typing + cancellation */
+function sleep(ms){ return new Promise(r=>setTimeout(r,ms)); }
+async function typeTextInto(el, text, speed=8, gen=0){
+  el.textContent = "";
+  for(let i=0;i<text.length;i++){
+    if(gen !== renderGeneration) return; // canceled
+    el.textContent += text[i];
+    await sleep(speed);
+  }
+}
+async function typeNodesSequential(nodes, texts, speed=8, gap=40, gen=0){
+  for(let i=0;i<nodes.length;i++){
+    if(gen !== renderGeneration) return;
+    nodes[i].textContent = "";
+    for(let j=0;j<texts[i].length;j++){
+      if(gen !== renderGeneration) return;
+      nodes[i].textContent += texts[i][j];
+      await sleep(speed);
+    }
+    await sleep(gap);
+  }
 }
 
-function leftRender(){
-  leftCol.innerHTML="";
-  menu.forEach((m,i)=>{
-    let d=document.createElement("div");
-    d.className="menu-item"+(i===selected&&!inSub?" selected":"");
-    d.textContent=(i===selected&&!inSub?"> ":"   ")+m;
-    leftCol.appendChild(d);
+/* Build left column once (avoid duplicate listeners) */
+const leftNodes = [];
+function buildLeftOnce(){
+  leftCol.innerHTML = "";
+  MENU.forEach((m,i)=>{
+    const el = document.createElement("div");
+    el.className = "left-item";
+    el.tabIndex = 0;
+    el.textContent = m.label;
+    // click / tap behavior
+    el.addEventListener("click", ()=>{
+      if(mode === "locked") return;
+      if(selectedMenu === i){
+        if(m.submenu){
+          if(mode !== "sub"){ mode = "sub"; selectedDetail = 0; lastRenderSig=""; renderAll(); }
+        } else if(m.key === "EXIT"){ closeAndReset(); }
+        else { mode = "main"; lastRenderSig=""; renderAll(); }
+      } else {
+        selectedMenu = i; mode = "main"; lastRenderSig=""; renderAll();
+      }
+    });
+    el.addEventListener("touchstart", (ev)=>{ ev.preventDefault(); el.click(); }, {passive:false});
+    leftCol.appendChild(el);
+    leftNodes.push(el);
   });
 }
 
-function rightRender(){
-  rightCol.innerHTML="";
-  let head=document.createElement("div");
-  typeText(head,menu[selected]);
-  rightCol.appendChild(head);
+/* Left render: just toggle class + text to avoid rebuild */
+function renderLeft(){
+  leftNodes.forEach((el,i)=>{
+    el.classList.toggle("main-selected", mode === "main" && i === selectedMenu);
+    // show '>' text only when in main mode selected
+    el.textContent = (mode === "main" && i === selectedMenu) ? ("> " + MENU[i].label) : ("  " + MENU[i].label);
+  });
+}
 
-  if(inSub && activeMenu && submenus[activeMenu]){
-    let sep=document.createElement("div");
-    sep.textContent="----------------";
-    rightCol.appendChild(sep);
+/* Right render: typing with cancellation guard */
+async function renderRight(){
+  const sig = `${mode}|${selectedMenu}|${selectedDetail}`;
+  if(sig === lastRenderSig) return; // nothing changed -> skip
+  lastRenderSig = sig;
+  renderGeneration++;
+  const gen = renderGeneration;
+  rightCol.innerHTML = "";
 
-    submenus[activeMenu].forEach((s,i)=>{
-      let d=document.createElement("div");
-      d.className="sub-item"+(i===subSel?" selected":"");
-      d.textContent=(i===subSel?"> ":"   ")+s;
+  const item = MENU[selectedMenu];
+
+  // SUBMODE (submenu typed on right)
+  if(mode === "sub" && item.submenu){
+    const nodes = [];
+    for(let i=0;i<item.submenu.length;i++){
+      const d = document.createElement("div");
+      d.className = "detail-line";
+      d.addEventListener("click", ()=> {
+        const url = item.submenu[i].url;
+        if(url) window.open(url,"_blank");
+      });
+      d.addEventListener("touchstart", ()=> { selectedDetail = i; renderAll(); }, {passive:true});
       rightCol.appendChild(d);
-    });
+      nodes.push(d);
+    }
+    const texts = item.submenu.map((m,i)=> i === selectedDetail ? `>  ${m.name}` : `   ${m.name}`);
+    await typeNodesSequential(nodes, texts, 8, 40, gen);
+    if(gen === renderGeneration){
+      const nodesAfter = Array.from(rightCol.querySelectorAll(".detail-line"));
+      nodesAfter.forEach((n,i)=> n.classList.toggle("sub-selected", i===selectedDetail));
+    }
+    return;
+  }
+
+  /* MAIN MODE content rendering */
+  if(item.key === "DICTIONARY"){
+    const pre = document.createElement("pre"); pre.style.margin = "0";
+    rightCol.appendChild(pre);
+    await typeTextInto(pre, DICTIONARY_TEXT, 7, gen);
+    return;
+  }
+
+  if(item.key === "BOUNTY"){
+    const lines = BOUNTIES.map((r,idx)=> idx===0 ? r.join(", ") : `${r[0]}, ${formatMoney(r[1])}`);
+    const nodes = lines.map(()=> { const d = document.createElement("div"); d.className="detail-line plain"; rightCol.appendChild(d); return d; });
+    await typeNodesSequential(nodes, lines, 9, 40, gen);
+    return;
+  }
+
+  if(item.key === "MEDIA"){
+    const nodes = MEDIA.map(()=> { const d = document.createElement("div"); d.className="detail-line plain"; rightCol.appendChild(d); return d; });
+    const texts = MEDIA.map(m=>m.name);
+    await typeNodesSequential(nodes, texts, 9, 35, gen);
+    return;
+  }
+
+  if(item.key === "EXIT"){
+    const d = document.createElement("div");
+    rightCol.appendChild(d);
+    await typeTextInto(d, "Press Enter to return to password prompt.", 10, gen);
+    return;
   }
 }
 
-function renderAll(){ leftRender(); rightRender(); }
+/* Combined render */
+function renderAll(){ renderLeft(); renderRight(); }
 
-function openMenu(){
-  container.classList.add("open");
-  setTimeout(()=>{
-    menuArea.style.display="block";
-    renderAll();
-  },500);
+/* Open / Close */
+function openSequence(){
+  container.classList.remove("anim-closing");
+  container.classList.add("anim-opening");
+  // show menuArea display after a short tick
+  menuArea.style.display = "flex";
+  setTimeout(()=> {
+    container.classList.add("open");
+    setTimeout(()=> container.classList.remove("anim-opening"), 320);
+  }, 10);
+  mode = "main"; selectedMenu = 0; selectedDetail = 0; lastRenderSig = "";
+  menuArea.setAttribute("aria-hidden","false");
+  setTimeout(()=> renderAll(), 300);
 }
-function closeMenu(){
+
+function closeAndReset(){
+  // hide menu immediately to avoid flicker
+  menuArea.setAttribute("aria-hidden","true");
+  menuArea.style.display = "none";
+  // animate container closing
+  container.classList.add("anim-closing");
+  container.classList.remove("anim-opening");
   container.classList.remove("open");
-  menuArea.style.display="none"; // hide immediately
+  setTimeout(()=> {
+    container.classList.remove("anim-closing");
+    // reset state & cancel typing
+    mode = "locked"; selectedMenu = 0; selectedDetail = 0; lastRenderSig = ""; renderGeneration++;
+    rightCol.innerHTML = "";
+    // reset and focus password input
+    pwInputClearAndFocus();
+    // reset left visual state
+    renderLeft();
+    konamiBuf = [];
+  }, 260);
 }
 
-function resetAll(){
-  selected=0; subSel=0; inSub=false; activeMenu=null;
+/* clear password field and focus */
+function pwInputClearAndFocus(){
+  pwInput.value = "";
+  // ensure pwSection visible and focused after a tiny delay
+  setTimeout(()=> {
+    pwInput.focus();
+  }, 160);
 }
 
-function exitMenu(){
-  closeMenu();
-  resetAll();
-  pwPrompt.classList.remove("hidden");
-  pwInput.value="";
-  pwInput.focus();
-}
+/* keyboard handling for app */
+function handleGlobalKey(e){
+  const nk = normalizeKey(e);
+  pushKonami(nk);
 
-function handleMainEnter(){
-  let m=menu[selected];
-  if(m==="EXIT"){ exitMenu(); return; }
-  if(submenus[m]){
-    inSub=true; subSel=0; activeMenu=m;
+  if(mode === "locked") return;
+
+  if(["w","s","a","d","enter"].includes(nk)) e.preventDefault();
+
+  if(mode === "main"){
+    if(nk === "w"){ selectedMenu = (selectedMenu - 1 + MENU.length) % MENU.length; lastRenderSig=""; renderAll(); return; }
+    if(nk === "s"){ selectedMenu = (selectedMenu + 1) % MENU.length; lastRenderSig=""; renderAll(); return; }
+    if(nk === "d" || nk === "enter"){
+      const m = MENU[selectedMenu];
+      if(m.submenu){ mode = "sub"; selectedDetail = 0; lastRenderSig=""; renderAll(); return; }
+      if(m.key === "EXIT"){ closeAndReset(); return; }
+      lastRenderSig=""; renderAll(); return;
+    }
+    return;
   }
-  renderAll();
-}
 
-function handleSubEnter(){
-  let sub=submenus[activeMenu][subSel];
-  if(sub==="DISCORD") window.open("https://discord.com","_blank");
-  if(sub==="INSTAGRAM") window.open("https://instagram.com","_blank");
-  if(sub==="ROBLOX") window.open("https://roblox.com","_blank");
-}
-
-function handleKey(e){
-  if(pwPrompt.classList.contains("hidden")){
-    if(e.key==="w"||e.key==="ArrowUp"){
-      if(!inSub){ selected=(selected-1+menu.length)%menu.length; }
-      else { subSel=(subSel-1+submenus[activeMenu].length)%submenus[activeMenu].length; }
+  if(mode === "sub"){
+    const m = MENU[selectedMenu];
+    if(!m.submenu){ mode="main"; lastRenderSig=""; renderAll(); return; }
+    const len = m.submenu.length;
+    if(nk === "w"){ selectedDetail = (selectedDetail -1 + len) % len; lastRenderSig=""; renderAll(); return; }
+    if(nk === "s"){ selectedDetail = (selectedDetail +1) % len; lastRenderSig=""; renderAll(); return; }
+    if(nk === "a"){ mode="main"; selectedDetail=0; lastRenderSig=""; renderAll(); return; }
+    if(nk === "d"){
+      const chosen = m.submenu[selectedDetail];
+      if(chosen && chosen.url) window.open(chosen.url,"_blank");
+      return;
     }
-    if(e.key==="s"||e.key==="ArrowDown"){
-      if(!inSub){ selected=(selected+1)%menu.length; }
-      else { subSel=(subSel+1)%submenus[activeMenu].length; }
+    if(nk === "enter"){
+      const chosen = m.submenu[selectedDetail];
+      if(chosen && chosen.url) window.open(chosen.url,"_blank");
+      return;
     }
-    if(e.key==="Enter"||e.key==="d"||e.key==="ArrowRight"){
-      if(!inSub) handleMainEnter();
-      else handleSubEnter();
-    }
-    if(e.key==="a"||e.key==="ArrowLeft"){
-      if(inSub){ inSub=false; activeMenu=null; }
-    }
-    renderAll();
   }
 }
-document.addEventListener("keydown",handleKey);
 
-// password
-const secret="@2#1#3$1#1%1#1^3%2(2*1@2^2#3(1&1^3#3*1(2!2#2$3!2^3#3#1#2";
-pwInput.addEventListener("keydown",e=>{
-  if(e.key==="Enter"){
-    if(pwInput.value===secret){
-      pwPrompt.classList.add("hidden");
-      openMenu();
+/* PASSWORD input handling (capsule) */
+pwInput.addEventListener("keydown", (ev)=>{
+  const nk = normalizeKey(ev);
+  pushKonami(nk);
+  if(ev.key === "Enter"){
+    ev.preventDefault();
+    if(pwInput.value === CORRECT_PASSWORD){
+      // ensure menuArea ready for animation
+      menuArea.style.display = "flex";
+      openSequence();
+      setTimeout(()=>{ pwInput.blur(); }, 260);
     } else {
-      alert("Wrong password");
-      pwInput.value="";
+      // wrong password: shake + clear
+      pwSection.classList.remove("shake");
+      // force reflow to restart animation if needed
+      void pwSection.offsetWidth;
+      pwSection.classList.add("shake");
+      pwInput.value = "";
+      setTimeout(()=> pwSection.classList.remove("shake"), 480);
     }
   }
 });
 
-// konami
-let kseq=[]; let kode=["ArrowUp","ArrowUp","ArrowDown","ArrowDown","ArrowLeft","ArrowRight","ArrowLeft","ArrowRight","b","a"];
-document.addEventListener("keydown",e=>{
-  kseq.push(e.key);
-  if(kseq.length>kode.length) kseq.shift();
-  if(JSON.stringify(kseq)===JSON.stringify(kode)){
-    window.open("https://www.youtube.com/watch?v=dQw4w9WgXcQ","_blank");
+/* click on right detail opens links in sub-mode */
+rightCol.addEventListener("click", (ev)=>{
+  const node = ev.target.closest(".detail-line");
+  if(!node) return;
+  const children = Array.from(rightCol.querySelectorAll(".detail-line"));
+  const idx = children.indexOf(node);
+  if(mode === "sub"){
+    const chosen = MENU[selectedMenu].submenu[idx];
+    if(chosen && chosen.url) window.open(chosen.url,"_blank");
   }
 });
+
+/* global key listener */
+document.addEventListener("keydown", handleGlobalKey);
+
+/* init */
+function init(){
+  buildLeftOnce();
+  renderLeft();
+  // hide menuArea by default (menuArea.style.display may be toggled during open/close)
+  menuArea.style.display = "none";
+  setTimeout(()=> pwInput.focus(),80);
+}
+init();
+
 </script>
 </body>
 </html>
