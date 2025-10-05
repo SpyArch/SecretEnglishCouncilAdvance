@@ -4,94 +4,108 @@
 <meta charset="UTF-8">
 <title>Secret Menu</title>
 <style>
+  /* Basic reset */
   * { box-sizing: border-box; margin: 0; padding: 0; }
   html, body { height: 100%; width: 100%; }
   body {
-    background-color: #000;
+    background: #000;
     color: #fff;
-    font-family: Arial, sans-serif;
+    font-family: monospace;
     display: flex;
-    align-items: center;
     justify-content: center;
+    align-items: center;
   }
+
+  /* Container */
   #app {
-    background-color: #000;
+    background: #000;
     border: 2px solid #fff;
-    border-radius: 25px;
     width: 300px;
     height: 60px;
     overflow: hidden;
-    transition: all 0.6s ease;
+    transition: all 0.5s ease;
     position: relative;
   }
   #app.menu {
     width: 80vw;
-    max-width: 800px;
+    max-width: 900px;
     height: 80vh;
-    border-radius: 0px;
+    border-radius: 0px; /* Sharp corners */
+    display: flex;
   }
+
   /* Login screen */
   #login-screen {
     width: 100%;
     height: 100%;
     display: flex;
-    align-items: center;
     justify-content: center;
+    align-items: center;
   }
   #password-input {
     width: 80%;
-    padding: 10px 15px;
+    padding: 10px;
     font-size: 16px;
     color: #fff;
     background: transparent;
     border: 2px solid #fff;
-    border-radius: 25px;
     outline: none;
+    text-align: center;
   }
-  #password-input::placeholder {
-    color: #fff;
-    opacity: 0.7;
-  }
-  #login-button { display: none; }
+  #password-input::placeholder { color: #fff; opacity: 0.6; }
+
   /* Main menu */
   #main-menu {
-    display: flex;
     width: 100%;
     height: 100%;
+    display: flex;
     opacity: 0;
-    transition: opacity 0.3s ease 0.6s;
+    transition: opacity 0.3s ease 0.5s;
   }
   #app.menu #main-menu { opacity: 1; }
+
   #left-panel {
     width: 200px;
     min-width: 150px;
-    background-color: #111;
     border-right: 2px solid #fff;
+    padding: 10px;
+  }
+  #menu-list, #submenu-list { list-style: none; }
+  #menu-list li, #submenu-list li {
+    padding: 5px 10px;
+    cursor: pointer;
+    position: relative;
+  }
+  #menu-list li.selected::before,
+  #submenu-list li.selected::before { content: "> "; color: #fff; position: absolute; left: 0; }
+
+  #content-panel {
+    flex: 1;
     padding: 10px;
     overflow-y: auto;
   }
-  #menu-list, #submenu-list { list-style: none; }
-  #menu-list li, #submenu-list li { padding: 5px 10px; cursor: pointer; position: relative; }
-  #menu-list li.selected, #submenu-list li.selected { background-color: #333; }
-  #menu-list li::before, #submenu-list li::before { content: ""; display: inline-block; width: 20px; }
-  #menu-list li.selected::before, #submenu-list li.selected::before { content: ">"; color: #fff; }
-  #content-panel { flex: 1; padding: 10px; overflow-y: auto; position: relative; }
-  #bounty-table { width: 100%; border-collapse: collapse; }
-  #bounty-table th, #bounty-table td { border: 1px solid #fff; padding: 5px 10px; text-align: left; }
+
+  /* Tables */
+  table { border-collapse: collapse; width: 100%; }
+  th, td { border: 1px solid #fff; padding: 5px; text-align: left; }
+
+  /* Hidden */
   .hidden { display: none; }
-  @media (max-width: 600px) {
+
+  /* Submenu indent */
+  #submenu-list li { padding-left: 20px; }
+
+  /* Mobile */
+  @media(max-width:600px) {
     #left-panel { width: 120px; }
-    #menu-list li, #submenu-list li { font-size: 14px; padding: 5px; }
+    #menu-list li, #submenu-list li { font-size: 14px; }
   }
 </style>
 </head>
 <body>
 <div id="app">
   <div id="login-screen">
-    <form id="login-form">
-      <input type="password" id="password-input" placeholder="Enter Password" required autofocus>
-      <button type="submit" id="login-button">Enter</button>
-    </form>
+    <input type="password" id="password-input" placeholder="Enter Password">
   </div>
   <div id="main-menu" class="hidden">
     <div id="left-panel">
@@ -105,158 +119,176 @@
     </div>
     <div id="content-panel">
       <div id="bounty-content" class="hidden">
-        <table id="bounty-table">
+        <table>
           <tr><th>Name</th><th>Bounty</th></tr>
-          <tr><td>Janna</td><td>$2,900,000,000</td></tr>
-          <tr><td>Sabrina</td><td>$2,400,000,000</td></tr>
-          <tr><td>Juan</td><td>$400,000,000</td></tr>
-          <tr><td>Angel</td><td>$1,700,000,000</td></tr>
-          <tr><td>Aubrey</td><td>$700,000,000</td></tr>
+          <tr><td>Alice</td><td>$1,000</td></tr>
+          <tr><td>Bob</td><td>$750</td></tr>
+          <tr><td>Charlie</td><td>$500</td></tr>
         </table>
       </div>
       <div id="dictionary-content" class="hidden">
         <pre>
 KuroSaru - (noun) A Japanese-inspired name meaning “Black Monkey”
 Kokujin - (noun) Japanese term meaning “black person”
-Airball - Filipino Starter Pack (also known as Feyleypenos)
+Airball - Filipino Starter Pack
 Gerald - Someone Black
-Janna - (slang'd-name) Someone fat
-Kevin - (slang'd-name) Kevin is a slang term meaning "something bad"
-Owen - (slang'd-name) meaning "something good"
-Pica - (vulgar) Slovak insult, roughly equivalent to “bitch”
+Janna - (slang) Someone fat
+Kevin - (slang) Something bad
+Owen - (slang) Something good
+Pica - Slovak insult, roughly equivalent to “bitch”
         </pre>
       </div>
     </div>
   </div>
 </div>
 <script>
+const PASSWORD = "@2#1#3$1#1%1#1^3%2(2*1@2^2#3(1&1^3#3*1(2!2#2$3!2^3#3#1#2";
+const menuList = document.querySelectorAll('#menu-list li');
+const submenuList = document.getElementById('submenu-list');
+const bountyContent = document.getElementById('bounty-content');
+const dictionaryContent = document.getElementById('dictionary-content');
+const loginScreen = document.getElementById('login-screen');
+const mainMenu = document.getElementById('main-menu');
+const app = document.getElementById('app');
+const passwordInput = document.getElementById('password-input');
+
+const mediaLinks = [
+  {name:'DISCORD', url:'https://discord.com'},
+  {name:'INSTAGRAM', url:'https://instagram.com'},
+  {name:'ROBLOX', url:'https://www.roblox.com'}
+];
+
 let loggedIn = false;
 let mainIndex = 0;
 let subIndex = 0;
 let inSubmenu = false;
-const keyBuffer = [];
+let keyBuffer = [];
 const konamiCode = ['w','w','s','s','a','d','a','d','b','a','enter'];
 
-const loginForm = document.getElementById('login-form');
-const passwordInput = document.getElementById('password-input');
-const app = document.getElementById('app');
-const loginScreen = document.getElementById('login-screen');
-const mainMenu = document.getElementById('main-menu');
-const menuItems = document.querySelectorAll('#menu-list li');
-const submenu = document.getElementById('submenu-list');
+passwordInput.addEventListener('keydown', e => {
+  if(e.key === 'Enter'){
+    e.preventDefault();
+    if(passwordInput.value === PASSWORD){
+      loginScreen.classList.add('hidden');
+      mainMenu.classList.remove('hidden');
+      app.classList.add('menu');
+      passwordInput.value = '';
+      loggedIn = true;
+      selectMain(mainIndex);
+    } else {
+      alert("Incorrect password.");
+      passwordInput.value = '';
+    }
+  }
+});
 
-const mediaLinks = [
-  { name: 'DISCORD', url: 'https://discord.com' },
-  { name: 'INSTAGRAM', url: 'https://instagram.com' },
-  { name: 'ROBLOX', url: 'https://www.roblox.com' }
-];
-
-function openMenu() {
-  loggedIn = true;
-  app.classList.add('menu');
-  loginScreen.classList.add('hidden');
-  mainMenu.classList.remove('hidden');
-  passwordInput.blur();
-  passwordInput.value = "";
-  mainIndex = 0;
-  selectMainItem(mainIndex);
+function selectMain(index){
+  menuList.forEach(li => li.classList.remove('selected'));
+  menuList[index].classList.add('selected');
+  showContent();
 }
 
-function exitMenu() {
-  loggedIn = false;
-  app.classList.remove('menu');
-  loginScreen.classList.remove('hidden');
+function selectSub(index){
+  const subItems = submenuList.querySelectorAll('li');
+  subItems.forEach(li => li.classList.remove('selected'));
+  if(subItems[index]) subItems[index].classList.add('selected');
+}
+
+function showContent(){
+  bountyContent.classList.add('hidden');
+  dictionaryContent.classList.add('hidden');
+  submenuList.classList.add('hidden');
+  submenuList.innerHTML = '';
+  inSubmenu = false;
+  subIndex = 0;
+  if(mainIndex === 0) bountyContent.classList.remove('hidden');
+  if(mainIndex === 2) dictionaryContent.classList.remove('hidden');
+  if(mainIndex === 1){
+    submenuList.classList.remove('hidden');
+    mediaLinks.forEach((m,idx)=>{
+      const li = document.createElement('li');
+      li.textContent = m.name;
+      li.dataset.index = idx;
+      submenuList.appendChild(li);
+    });
+    inSubmenu = true;
+    selectSub(subIndex);
+  }
+  if(mainIndex === 3) exitMenu();
+}
+
+function exitMenu(){
   mainMenu.classList.add('hidden');
-  passwordInput.focus();
+  loginScreen.classList.remove('hidden');
+  app.classList.remove('menu');
+  loggedIn = false;
   mainIndex = 0;
   subIndex = 0;
   inSubmenu = false;
-  keyBuffer.length = 0;
-  menuItems.forEach(li => li.classList.remove('selected'));
-  submenu.classList.add('hidden');
-  submenu.innerHTML = "";
+  keyBuffer = [];
+  passwordInput.focus();
 }
 
-function selectMainItem(idx) {
-  menuItems.forEach(li => li.classList.remove('selected'));
-  menuItems[idx].classList.add('selected');
-}
-
-function selectSubItem(idx) {
-  const subItems = submenu.querySelectorAll('li');
-  subItems.forEach(li => li.classList.remove('selected'));
-  subItems[idx].classList.add('selected');
-}
-
-function showMediaSubmenu() {
-  submenu.innerHTML = "";
-  mediaLinks.forEach((link, idx) => {
-    const li = document.createElement('li');
-    li.textContent = link.name;
-    li.dataset.index = idx;
-    submenu.appendChild(li);
-  });
-  submenu.classList.remove('hidden');
-  inSubmenu = true;
-  subIndex = 0;
-  menuItems[mainIndex].classList.remove('selected');
-  selectSubItem(subIndex);
-}
-
-function openMediaLink(idx) {
+function openMediaLink(idx){
   window.open(mediaLinks[idx].url, '_blank');
 }
 
-loginForm.addEventListener('submit', (e) => {
-  e.preventDefault();
-  if (passwordInput.value === "@2#1#3$1#1%1#1^3%2(2*1@2^2#3(1&1^3#3*1(2!2#2$3!2^3#3#1#2") {
-    openMenu();
-  } else {
-    alert("Incorrect password.");
-    passwordInput.value = "";
+menuList.forEach(li => {
+  li.addEventListener('click', ()=>{
+    mainIndex = parseInt(li.dataset.index);
+    selectMain(mainIndex);
+  });
+});
+
+submenuList.addEventListener('click', e=>{
+  if(e.target.tagName==='LI'){
+    const idx = parseInt(e.target.dataset.index);
+    openMediaLink(idx);
   }
 });
 
-document.addEventListener('keydown', (e) => {
-  if (!loggedIn) return;
-  let key = e.key.toLowerCase();
-  if (key === 'arrowup') key='w';
-  if (key === 'arrowdown') key='s';
-  if (key === 'arrowleft') key='a';
-  if (key === 'arrowright') key='d';
-  // Konami code
-  keyBuffer.push(key);
-  if (keyBuffer.length > konamiCode.length) keyBuffer.shift();
-  if (keyBuffer.length === konamiCode.length && konamiCode.every((k,i)=>keyBuffer[i]===k)) {
-    window.open('https://www.youtube.com/watch?v=dQw4w9WgXcQ','_blank');
-    keyBuffer.length = 0;
+document.addEventListener('keydown', e=>{
+  if(!loggedIn) return;
+  let k = e.key.toLowerCase();
+  if(k==='arrowup') k='w';
+  if(k==='arrowdown') k='s';
+  if(k==='arrowleft') k='a';
+  if(k==='arrowright') k='d';
+
+  // Konami tracking
+  keyBuffer.push(k);
+  if(keyBuffer.length>konamiCode.length) keyBuffer.shift();
+  if(keyBuffer.length===konamiCode.length && konamiCode.every((v,i)=>v===keyBuffer[i])){
+    window.open('https://www.youtube.com/watch?v=dQw4w9WgXcQ', '_blank');
+    keyBuffer=[];
   }
-  // Navigation
-  if (key==='w'){
-    if(inSubmenu && subIndex>0) subIndex--, selectSubItem(subIndex);
-    else if(!inSubmenu && mainIndex>0) mainIndex--, selectMainItem(mainIndex);
+
+  if(k==='w'){
+    if(inSubmenu){
+      if(subIndex>0) subIndex--; selectSub(subIndex);
+    } else { if(mainIndex>0) mainIndex--; selectMain(mainIndex); }
     e.preventDefault();
   }
-  if (key==='s'){
-    if(inSubmenu && subIndex<submenu.querySelectorAll('li').length-1) subIndex++, selectSubItem(subIndex);
-    else if(!inSubmenu && mainIndex<menuItems.length-1) mainIndex++, selectMainItem(mainIndex);
+  if(k==='s'){
+    if(inSubmenu){
+      if(subIndex<submenuList.querySelectorAll('li').length-1) subIndex++; selectSub(subIndex);
+    } else { if(mainIndex<menuList.length-1) mainIndex++; selectMain(mainIndex); }
     e.preventDefault();
   }
-  if (key==='a' && inSubmenu) { inSubmenu=false; submenu.classList.add('hidden'); menuItems[mainIndex].classList.add('selected'); e.preventDefault();}
-  if (key==='d') { if(!inSubmenu) handleMainEnter(); e.preventDefault();}
-  if (key==='enter') { if(inSubmenu) openMediaLink(subIndex); else handleMainEnter(); e.preventDefault();}
+  if(k==='a'){
+    if(inSubmenu){
+      inSubmenu=false;
+      submenuList.classList.add('hidden');
+      selectMain(mainIndex);
+    }
+    e.preventDefault();
+  }
+  if(k==='d' || k==='enter'){
+    if(inSubmenu) openMediaLink(subIndex);
+    else showContent();
+    e.preventDefault();
+  }
 });
-
-function handleMainEnter(){
-  if(mainIndex===0) { document.getElementById('bounty-content').classList.remove('hidden'); submenu.classList.add('hidden'); inSubmenu=false; }
-  if(mainIndex===1) showMediaSubmenu();
-  if(mainIndex===2) { document.getElementById('dictionary-content').classList.remove('hidden'); submenu.classList.add('hidden'); inSubmenu=false;}
-  if(mainIndex===3) exitMenu();
-}
-
-// Clicks
-menuItems.forEach(li=>li.addEventListener('click',()=>{mainIndex=parseInt(li.dataset.index);selectMainItem(mainIndex);handleMainEnter();}));
-submenu.addEventListener('click',(e)=>{if(e.target.tagName==='LI') openMediaLink(parseInt(e.target.dataset.index));});
 </script>
 </body>
 </html>
