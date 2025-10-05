@@ -1,347 +1,425 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="utf-8"/>
-<meta name="viewport" content="width=device-width,initial-scale=1"/>
-<title>Private Dictionary — Black & White</title>
+<meta charset="UTF-8">
+<title>Secret Menu</title>
 <style>
-/* Reset & base */
-*{box-sizing:border-box;margin:0;padding:0}
-html,body{height:100%;background:#000;color:#fff;font-family:monospace}
-body{display:flex;align-items:center;justify-content:center;overflow:hidden}
-
-/* Container: capsule -> rectangle */
-#container{
-  width:320px;height:56px;border:2px solid #fff;border-radius:28px;
-  background:#000;display:flex;align-items:center;justify-content:center;
-  transition:width .52s cubic-bezier(.2,.9,.2,1),height .52s cubic-bezier(.2,.9,.2,1),border-radius .4s;
-  overflow:hidden;transform-origin:center;position:relative;
-}
-@keyframes hypr-open{from{transform:scale(.98);opacity:0}to{transform:scale(1);opacity:1}}
-@keyframes hypr-close{from{transform:scale(1);opacity:1}to{transform:scale(.98);opacity:0}}
-.anim-opening{animation:hypr-open .26s ease both}
-.anim-closing{animation:hypr-close .22s ease both}
-#container.open{width:88vw;max-width:980px;height:72vh;max-height:720px;border-radius:10px;padding:12px}
-
-/* Password capsule */
-#pwSection{width:100%;padding:8px;display:flex;justify-content:center;align-items:center}
-#password{
-  width:86%;background:transparent;border:none;outline:none;color:#fff;font-size:18px;text-align:center;caret-color:#fff;
-  padding:8px;border-radius:6px;
-}
-
-/* shake for wrong password */
-@keyframes shake{20%{transform:translateX(-8px)}40%{transform:translateX(8px)}60%{transform:translateX(-6px)}80%{transform:translateX(6px)}100%{transform:translateX(0)}}
-.shake{animation:shake .42s ease}
-
-/* Menu area */
-#menuArea{display:none;width:100%;height:100%}
-#container.open #menuArea{display:flex}
-
-/* Left column */
-#leftCol{width:260px;max-width:34%;min-width:160px;border-right:2px solid #fff;padding-right:12px;display:flex;flex-direction:column;gap:6px;align-items:flex-start}
-.left-item{padding:8px 6px;cursor:pointer;user-select:none;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.left-item.main-selected::before{content:"> ";margin-right:6px;color:#fff}
-
-/* Right column */
-#rightCol{flex:1;padding-left:18px;padding-right:12px;overflow-y:auto;white-space:pre-wrap;font-size:15px;line-height:1.4}
-#rightCol::-webkit-scrollbar{height:8px;width:8px;background:transparent}
-#rightCol::-webkit-scrollbar-thumb{background:rgba(255,255,255,0.06);border-radius:4px}
-#rightCol{-ms-overflow-style:none;scrollbar-width:thin}
-
-/* Detail lines */
-.detail-line{position:relative;padding:6px 0 6px 28px;cursor:pointer;user-select:none;color:#fff}
-.detail-line.plain{padding-left:6px}
-
-/* responsive */
-@media (max-width:520px){#container.open{width:94vw;height:78vh;padding:8px}#leftCol{width:40%;max-width:180px}}
-.left-item:focus,.detail-line:focus{outline:1px dashed #fff;outline-offset:2px}
+  /* Basic reset and body style */
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { height: 100%; width: 100%; }
+  body {
+    background-color: #000;
+    color: #fff;
+    font-family: Arial, sans-serif;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  #app {
+    background-color: #000;
+    border: 2px solid #fff;
+    border-radius: 25px;
+    width: 300px;
+    height: 60px;
+    overflow: hidden;
+    transition: all 0.6s ease;
+    position: relative;
+  }
+  #app.menu {
+    width: 80vw;
+    max-width: 800px;
+    height: 80vh;
+    border-radius: 0px;
+  }
+  /* Login screen */
+  #login-screen {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  #password-input {
+    width: 80%;
+    padding: 10px 15px;
+    font-size: 16px;
+    color: #fff;
+    background: transparent;
+    border: 2px solid #fff;
+    border-radius: 25px;
+    outline: none;
+  }
+  #password-input::placeholder {
+    color: #fff;
+    opacity: 0.7;
+  }
+  #login-button {
+    display: none;
+  }
+  /* Main menu */
+  #main-menu {
+    display: flex;
+    width: 100%;
+    height: 100%;
+    opacity: 0;
+    transition: opacity 0.3s ease 0.6s; /* fade in after expansion */
+  }
+  #app.menu #main-menu {
+    opacity: 1;
+  }
+  #left-panel {
+    width: 200px;
+    min-width: 150px;
+    background-color: #111;
+    border-right: 2px solid #fff;
+    padding: 10px;
+    overflow-y: auto;
+  }
+  #menu-list, #submenu-list {
+    list-style: none;
+  }
+  #menu-list li, #submenu-list li {
+    padding: 5px 10px;
+    cursor: pointer;
+    position: relative;
+  }
+  #menu-list li.selected, #submenu-list li.selected {
+    background-color: #333;
+  }
+  /* Arrow indicator */
+  #menu-list li::before, #submenu-list li::before {
+    content: "";
+    display: inline-block;
+    width: 20px;
+  }
+  #menu-list li.selected::before, #submenu-list li.selected::before {
+    content: ">";
+    color: #fff;
+  }
+  /* Content panel */
+  #content-panel {
+    flex: 1;
+    padding: 10px;
+    overflow-y: auto;
+    position: relative;
+  }
+  /* Bounty table */
+  #bounty-table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+  #bounty-table th, #bounty-table td {
+    border: 1px solid #fff;
+    padding: 5px 10px;
+    text-align: left;
+  }
+  /* Typing animation */
+  .typing {
+    font-family: "Courier New", Courier, monospace;
+    white-space: pre-wrap;
+  }
+  /* Hide content sections by default */
+  .hidden { display: none; }
+  /* Mobile styles */
+  @media (max-width: 600px) {
+    #left-panel { width: 120px; }
+    #menu-list li, #submenu-list li { font-size: 14px; padding: 5px; }
+  }
 </style>
 </head>
 <body>
-  <div id="container" aria-live="polite">
-    <div id="pwSection" aria-hidden="false">
-      <input id="password" type="password" autocomplete="off" placeholder="Enter password" aria-label="Password">
+<div id="app">
+  <!-- Login Screen -->
+  <div id="login-screen">
+    <form id="login-form">
+      <input type="password" id="password-input" placeholder="Enter Password" required autofocus>
+      <button type="submit" id="login-button">Enter</button>
+    </form>
+  </div>
+  <!-- Main Menu (hidden until login) -->
+  <div id="main-menu" class="hidden">
+    <!-- Left navigation panel -->
+    <div id="left-panel">
+      <ul id="menu-list">
+        <li data-index="0">BOUNTY</li>
+        <li data-index="1">MEDIA</li>
+        <li data-index="2">DICTIONARY</li>
+        <li data-index="3">EXIT</li>
+      </ul>
+      <ul id="submenu-list" class="hidden">
+        <!-- Submenu items (populated dynamically) -->
+      </ul>
     </div>
-
-    <div id="menuArea" aria-hidden="true" style="display:flex;width:100%;height:100%">
-      <div id="leftCol" role="menu" aria-label="Main menu"></div>
-      <div id="rightCol" role="region" aria-label="Detail panel"></div>
+    <!-- Content panel -->
+    <div id="content-panel">
+      <div id="bounty-content" class="hidden">
+        <table id="bounty-table">
+          <tr><th>Name</th><th>Bounty</th></tr>
+          <tr><td>Alice</td><td>$1000</td></tr>
+          <tr><td>Bob</td><td>$750</td></tr>
+          <tr><td>Charlie</td><td>$500</td></tr>
+        </table>
+      </div>
+      <div id="dictionary-content" class="hidden">
+        <div id="dictionary-text" class="typing"></div>
+      </div>
     </div>
   </div>
-
+</div>
 <script>
-/* ====== CONFIG ====== */
-const CORRECT_PASSWORD = "@2#1#3$1#1%1#1^3%2(2*1@2^2#3(1&1^3#3*1(2!2#2$3!2^3#3#1#2";
+  // State variables
+  let loggedIn = false;
+  let mainIndex = 0;
+  let subIndex = 0;
+  let inSubmenu = false;
+  const keyBuffer = [];
+  const konamiCode = ['w','w','s','s','a','d','a','d','b','a','enter'];
 
-/* media links */
-const MEDIA = [
-  {name:"DISCORD", url:"https://discord.gg/Bz2z7hqeb"},
-  {name:"INSTAGRAM", url:"https://www.instagram.com/secreteng_counciladvanced/"},
-  {name:"ROBLOX", url:"https://www.roblox.com/share/g/35306961"}
-];
+  // DOM elements
+  const loginForm = document.getElementById('login-form');
+  const passwordInput = document.getElementById('password-input');
+  const app = document.getElementById('app');
+  const loginScreen = document.getElementById('login-screen');
+  const mainMenu = document.getElementById('main-menu');
+  const menuItems = document.querySelectorAll('#menu-list li');
+  const submenu = document.getElementById('submenu-list');
+  const contentPanel = document.getElementById('content-panel');
+  const bountyContent = document.getElementById('bounty-content');
+  const dictionaryContent = document.getElementById('dictionary-content');
+  const dictionaryText = document.getElementById('dictionary-text');
 
-/* bounties */
-const BOUNTIES = [
-  ["Name","Bounty"],
-  ["Janna",2900000000],
-  ["Sabrina",2400000000],
-  ["Juan",400000000],
-  ["Angel",1700000000],
-  ["Aubrey",700000000]
-];
+  // Media links for MEDIA submenu
+  const mediaLinks = [
+    { name: 'DISCORD', url: 'https://discord.com' },
+    { name: 'INSTAGRAM', url: 'https://instagram.com' },
+    { name: 'ROBLOX', url: 'https://www.roblox.com' }
+  ];
 
-/* dictionary */
-const DICTIONARY_TEXT = `KuroSaru - (noun) A Japanese-inspired name meaning "Black Monkey"
-Kokujin - (noun) Japanese term meaning "black person"
-Airball - Filipino Starter Pack (also known as Feyleypenos)
-Gerald - Someone Black
-Janna - (slang'd-name) Someone fat
-Kevin - (slang'd-name) Kevin is a slang term meaning "something bad"
-Owen - (slang'd-name) meaning "something good"
-Pica - (vulgar) Slovak insult, roughly equivalent to "bitch"`;
+  // Dictionary content lines
+  const dictionaryStrings = ["cryptography: the art of writing or solving codes. It ensures the confidentiality and integrity of messages by transforming information into secret codes. This is often used to protect data and secure communication.", "\nencryption: the process of converting information or data into a code, especially to prevent unauthorized access."];
+  let dictInterval;
 
-/* menu model */
-const MENU = [
-  { key:"BOUNTY", label:"BOUNTY" },
-  { key:"MEDIA", label:"MEDIA", submenu: MEDIA },
-  { key:"DICTIONARY", label:"DICTIONARY" },
-  { key:"EXIT", label:"EXIT" }
-];
-
-/* konami */
-const KONAMI = ["w","w","s","s","a","d","a","d","b","a","enter"];
-const RICKROLL = "https://www.youtube.com/watch?v=dQw4w9WgXcQ";
-/* ==================== */
-
-/* DOM */
-const container = document.getElementById("container");
-const pwSection = document.getElementById("pwSection");
-const pwInput = document.getElementById("password");
-const menuArea = document.getElementById("menuArea");
-const leftCol = document.getElementById("leftCol");
-const rightCol = document.getElementById("rightCol");
-
-/* state */
-let mode = "locked"; // 'locked'|'main'|'sub'
-let selectedMenu = 0;
-let selectedDetail = 0;
-let konamiBuf = [];
-let lastRenderSig = "";
-let renderGeneration = 0; // token to cancel typing tasks
-
-/* helpers */
-function normalizeKey(e){
-  if(!e) return "";
-  if(e.key==="ArrowUp") return "w";
-  if(e.key==="ArrowDown") return "s";
-  if(e.key==="ArrowLeft") return "a";
-  if(e.key==="ArrowRight") return "d";
-  if(e.key==="Enter") return "enter";
-  return (""+e.key).toLowerCase();
-}
-function pushKonami(k){
-  konamiBuf.push(k);
-  if(konamiBuf.length > KONAMI.length) konamiBuf.shift();
-  if(konamiBuf.length === KONAMI.length && KONAMI.every((v,i)=>konamiBuf[i]===v)){
-    window.open(RICKROLL,"_blank");
-    konamiBuf = [];
-  }
-}
-function formatMoney(n){ try { return "$"+Number(n).toLocaleString("en-US"); } catch(e){ return "$"+n; } }
-
-/* typing with cancellation */
-function sleep(ms){ return new Promise(r=>setTimeout(r,ms)); }
-async function typeTextInto(el,text,speed=8,gen=0){
-  el.textContent = "";
-  for(let i=0;i<text.length;i++){
-    if(gen !== renderGeneration) return;
-    el.textContent += text[i];
-    await sleep(speed);
-  }
-}
-async function typeNodesSequential(nodes,texts,speed=8,gap=40,gen=0){
-  for(let i=0;i<nodes.length;i++){
-    if(gen !== renderGeneration) return;
-    nodes[i].textContent = "";
-    for(let j=0;j<texts[i].length;j++){
-      if(gen !== renderGeneration) return;
-      nodes[i].textContent += texts[i][j];
-      await sleep(speed);
-    }
-    await sleep(gap);
-  }
-}
-
-/* build left once */
-const leftNodes = [];
-function buildLeftOnce(){
-  leftCol.innerHTML = "";
-  MENU.forEach((m,i)=>{
-    const el = document.createElement("div");
-    el.className = "left-item";
-    el.tabIndex = 0;
-    el.textContent = m.label;
-    el.addEventListener("click", ()=>{
-      if(mode==="locked") return;
-      if(selectedMenu === i){
-        if(m.submenu){
-          if(mode !== "sub"){ mode="sub"; selectedDetail=0; lastRenderSig=""; renderAll(); }
-        } else if(m.key==="EXIT"){ closeAndReset(); }
-        else { mode="main"; lastRenderSig=""; renderAll(); }
-      } else {
-        selectedMenu = i; mode="main"; lastRenderSig=""; renderAll();
-      }
-    });
-    el.addEventListener("touchstart",(ev)=>{ ev.preventDefault(); el.click(); },{passive:false});
-    leftCol.appendChild(el);
-    leftNodes.push(el);
-  });
-}
-
-/* render left (only updates classes/text) */
-function renderLeft(){
-  leftNodes.forEach((el,i)=>{
-    el.classList.toggle("main-selected", mode==="main" && i===selectedMenu);
-    el.textContent = (mode==="main" && i===selectedMenu) ? ("> " + MENU[i].label) : ("  " + MENU[i].label);
-  });
-}
-
-/* render right (typing, guarded) */
-async function renderRight(){
-  const sig = `${mode}|${selectedMenu}|${selectedDetail}`;
-  if(sig === lastRenderSig) return;
-  lastRenderSig = sig;
-  renderGeneration++;
-  const gen = renderGeneration;
-  rightCol.innerHTML = "";
-
-  const item = MENU[selectedMenu];
-
-  if(mode==="sub" && item.submenu){
-    const nodes = [];
-    for(let i=0;i<item.submenu.length;i++){
-      const d = document.createElement("div");
-      d.className="detail-line";
-      d.addEventListener("click", ()=> { const url = item.submenu[i].url; if(url) window.open(url,"_blank"); });
-      d.addEventListener("touchstart", ()=>{ selectedDetail = i; renderAll(); }, {passive:true});
-      rightCol.appendChild(d); nodes.push(d);
-    }
-    const texts = item.submenu.map((m,i)=> i===selectedDetail ? `>  ${m.name}` : `   ${m.name}`);
-    await typeNodesSequential(nodes,texts,8,40,gen);
-    if(gen===renderGeneration){
-      const after = Array.from(rightCol.querySelectorAll(".detail-line"));
-      after.forEach((n,i)=> n.classList.toggle("sub-selected", i===selectedDetail));
-    }
-    return;
-  }
-
-  if(item.key==="DICTIONARY"){
-    const pre = document.createElement("pre"); pre.style.margin="0"; rightCol.appendChild(pre);
-    await typeTextInto(pre, DICTIONARY_TEXT, 7, gen); return;
-  }
-
-  if(item.key==="BOUNTY"){
-    const lines = BOUNTIES.map((r,idx)=> idx===0 ? r.join(", ") : `${r[0]}, ${formatMoney(r[1])}`);
-    const nodes = lines.map(()=>{ const d=document.createElement("div"); d.className="detail-line plain"; rightCol.appendChild(d); return d; });
-    await typeNodesSequential(nodes,lines,9,40,gen); return;
-  }
-
-  if(item.key==="MEDIA"){
-    const nodes = MEDIA.map(()=>{ const d=document.createElement("div"); d.className="detail-line plain"; rightCol.appendChild(d); return d; });
-    const texts = MEDIA.map(m=>m.name);
-    await typeNodesSequential(nodes,texts,9,35,gen); return;
-  }
-
-  if(item.key==="EXIT"){
-    const d=document.createElement("div"); rightCol.appendChild(d);
-    await typeTextInto(d,"Press Enter to return to password prompt.",10,gen); return;
-  }
-}
-
-/* combined render */
-function renderAll(){ renderLeft(); renderRight(); }
-
-/* open/close sequences */
-function openSequence(){
-  container.classList.remove("anim-closing"); container.classList.add("anim-opening");
-  menuArea.style.display = "flex";
-  setTimeout(()=>{ container.classList.add("open"); setTimeout(()=>container.classList.remove("anim-opening"),320); }, 10);
-  mode="main"; selectedMenu=0; selectedDetail=0; lastRenderSig=""; menuArea.setAttribute("aria-hidden","false");
-  setTimeout(()=>renderAll(),300);
-}
-function closeAndReset(){
-  // immediate hide to avoid flicker
-  menuArea.setAttribute("aria-hidden","true"); menuArea.style.display = "none";
-  container.classList.add("anim-closing"); container.classList.remove("anim-opening"); container.classList.remove("open");
-  setTimeout(()=>{ container.classList.remove("anim-closing"); mode="locked"; selectedMenu=0; selectedDetail=0; lastRenderSig=""; renderGeneration++; rightCol.innerHTML=""; pwInputClearAndFocus(); renderLeft(); konamiBuf = []; }, 260);
-}
-function pwInputClearAndFocus(){ pwInput.value=""; setTimeout(()=>{ pwInput.focus(); }, 120); }
-
-/* global keys */
-function handleGlobalKey(e){
-  const nk = normalizeKey(e); pushKonami(nk);
-  if(mode==="locked") return;
-  if(["w","s","a","d","enter"].includes(nk)) e.preventDefault();
-
-  if(mode==="main"){
-    if(nk==="w"){ selectedMenu=(selectedMenu-1+MENU.length)%MENU.length; lastRenderSig=""; renderAll(); return;}
-    if(nk==="s"){ selectedMenu=(selectedMenu+1)%MENU.length; lastRenderSig=""; renderAll(); return;}
-    if(nk==="d"||nk==="enter"){
-      const m = MENU[selectedMenu];
-      if(m.submenu){ mode="sub"; selectedDetail=0; lastRenderSig=""; renderAll(); return;}
-      if(m.key==="EXIT"){ closeAndReset(); return;}
-      lastRenderSig=""; renderAll(); return;
-    }
-    return;
-  }
-
-  if(mode==="sub"){
-    const m = MENU[selectedMenu];
-    if(!m.submenu){ mode="main"; lastRenderSig=""; renderAll(); return; }
-    const len = m.submenu.length;
-    if(nk==="w"){ selectedDetail=(selectedDetail-1+len)%len; lastRenderSig=""; renderAll(); return;}
-    if(nk==="s"){ selectedDetail=(selectedDetail+1)%len; lastRenderSig=""; renderAll(); return;}
-    if(nk==="a"){ mode="main"; selectedDetail=0; lastRenderSig=""; renderAll(); return;}
-    if(nk==="d"){ const chosen=m.submenu[selectedDetail]; if(chosen && chosen.url) window.open(chosen.url,"_blank"); return;}
-    if(nk==="enter"){ const chosen=m.submenu[selectedDetail]; if(chosen && chosen.url) window.open(chosen.url,"_blank"); return;}
-  }
-}
-
-/* password handling */
-pwInput.addEventListener("keydown",(ev)=>{
-  const nk = normalizeKey(ev); pushKonami(nk);
-  if(ev.key==="Enter"){
-    ev.preventDefault();
-    if(pwInput.value === CORRECT_PASSWORD){
-      menuArea.style.display = "flex";
-      openSequence();
-      setTimeout(()=>pwInput.blur(),260);
+  // Handle login
+  loginForm.addEventListener('submit', (e) => {
+    e.preventDefault();
+    if (passwordInput.value === "S3cr3t_P@ssw0rd!2025") {
+      openMenu();
     } else {
-      // wrong password: shake + clear
-      pwSection.classList.remove("shake"); void pwSection.offsetWidth; pwSection.classList.add("shake");
-      pwInput.value = "";
-      setTimeout(()=>pwSection.classList.remove("shake"),480);
+      alert("Incorrect password.");
+      passwordInput.value = "";
+    }
+  });
+
+  function openMenu() {
+    loggedIn = true;
+    app.classList.add('menu');
+    loginScreen.classList.add('hidden');
+    mainMenu.classList.remove('hidden');
+    passwordInput.blur();
+    passwordInput.value = "";
+    mainIndex = 0;
+    selectMainItem(mainIndex);
+  }
+
+  // Arrow selection functions
+  function selectMainItem(index) {
+    // Deselect all main menu items
+    menuItems.forEach(li => li.classList.remove('selected'));
+    // Select current item
+    menuItems[index].classList.add('selected');
+  }
+
+  function selectSubItem(index) {
+    const subItems = submenu.querySelectorAll('li');
+    subItems.forEach(li => li.classList.remove('selected'));
+    subItems[index].classList.add('selected');
+  }
+
+  // Display functions
+  function clearContent() {
+    // Hide content panels
+    bountyContent.classList.add('hidden');
+    dictionaryContent.classList.add('hidden');
+    // Clear dictionary typing
+    clearInterval(dictInterval);
+    dictionaryText.textContent = "";
+    // Hide and clear submenu
+    submenu.classList.add('hidden');
+    submenu.innerHTML = "";
+    // Reset submenu state
+    inSubmenu = false;
+    subIndex = 0;
+  }
+
+  function showBounty() {
+    clearContent();
+    bountyContent.classList.remove('hidden');
+  }
+
+  function showDictionary() {
+    clearContent();
+    dictionaryContent.classList.remove('hidden');
+    typeDictionary();
+  }
+
+  function showMediaSubmenu() {
+    clearContent();
+    // Populate submenu with media links
+    mediaLinks.forEach((link, idx) => {
+      const li = document.createElement('li');
+      li.textContent = link.name;
+      li.dataset.index = idx;
+      submenu.appendChild(li);
+    });
+    submenu.classList.remove('hidden');
+    // Set submenu state
+    inSubmenu = true;
+    subIndex = 0;
+    // Deselect main menu arrow
+    menuItems[mainIndex].classList.remove('selected');
+    selectSubItem(subIndex);
+  }
+
+  function exitMenu() {
+    clearContent();
+    mainMenu.classList.add('hidden');
+    loginScreen.classList.remove('hidden');
+    app.classList.remove('menu');
+    loggedIn = false;
+    // Reset main menu selection
+    menuItems.forEach(li => li.classList.remove('selected'));
+    mainIndex = 0;
+    // Clear key buffer
+    keyBuffer.length = 0;
+    passwordInput.focus();
+  }
+
+  function typeDictionary() {
+    dictionaryText.textContent = "";
+    let fullText = dictionaryStrings.join('');
+    let i = 0;
+    dictInterval = setInterval(() => {
+      if (i < fullText.length) {
+        dictionaryText.textContent += fullText.charAt(i);
+        i++;
+      } else {
+        clearInterval(dictInterval);
+      }
+    }, 40);
+  }
+
+  function openMediaLink(idx) {
+    window.open(mediaLinks[idx].url, '_blank');
+  }
+
+  // Handle navigation keypresses
+  function handleKeyPress(e) {
+    if (!loggedIn) return;
+    let key = e.key.toLowerCase();
+    if (key === 'arrowup') key = 'w';
+    if (key === 'arrowdown') key = 's';
+    if (key === 'arrowleft') key = 'a';
+    if (key === 'arrowright') key = 'd';
+    trackKonami(key);
+    if (key === 'w') {
+      // Up
+      if (inSubmenu) {
+        if (subIndex > 0) {
+          subIndex--;
+          selectSubItem(subIndex);
+        }
+      } else {
+        if (mainIndex > 0) {
+          mainIndex--;
+          selectMainItem(mainIndex);
+        }
+      }
+      e.preventDefault();
+    } else if (key === 's') {
+      // Down
+      if (inSubmenu) {
+        if (subIndex < submenu.querySelectorAll('li').length - 1) {
+          subIndex++;
+          selectSubItem(subIndex);
+        }
+      } else {
+        if (mainIndex < menuItems.length - 1) {
+          mainIndex++;
+          selectMainItem(mainIndex);
+        }
+      }
+      e.preventDefault();
+    } else if (key === 'a') {
+      // Left
+      if (inSubmenu) {
+        // Exit submenu to main
+        inSubmenu = false;
+        submenu.classList.add('hidden');
+        submenu.querySelectorAll('li').forEach(li => li.classList.remove('selected'));
+        selectMainItem(mainIndex);
+      }
+      e.preventDefault();
+    } else if (key === 'd') {
+      // Right acts like enter on main menu
+      if (!inSubmenu) {
+        handleMainEnter();
+      }
+      e.preventDefault();
+    } else if (key === 'enter') {
+      if (inSubmenu) {
+        openMediaLink(subIndex);
+      } else {
+        handleMainEnter();
+      }
+      e.preventDefault();
     }
   }
-});
-document.addEventListener("keydown", handleGlobalKey);
 
-/* right click behavior (open link in sub-mode) */
-rightCol.addEventListener("click",(ev)=>{
-  const node = ev.target.closest(".detail-line");
-  if(!node) return;
-  const children = Array.from(rightCol.querySelectorAll(".detail-line"));
-  const idx = children.indexOf(node);
-  if(mode==="sub"){
-    const chosen = MENU[selectedMenu].submenu[idx];
-    if(chosen && chosen.url) window.open(chosen.url,"_blank");
+  function handleMainEnter() {
+    if (mainIndex === 0) {
+      showBounty();
+    } else if (mainIndex === 1) {
+      showMediaSubmenu();
+    } else if (mainIndex === 2) {
+      showDictionary();
+    } else if (mainIndex === 3) {
+      exitMenu();
+    }
   }
-});
 
-/* init */
-function init(){ buildLeftOnce(); renderLeft(); menuArea.style.display = "none"; setTimeout(()=>pwInput.focus(),80); }
-init();
+  // Konami code tracker
+  function trackKonami(key) {
+    keyBuffer.push(key);
+    if (keyBuffer.length > konamiCode.length) {
+      keyBuffer.shift();
+    }
+    if (keyBuffer.length === konamiCode.length && konamiCode.every((k, idx) => keyBuffer[idx] === k)) {
+      triggerRickRoll();
+      keyBuffer.length = 0;
+    }
+  }
+
+  function triggerRickRoll() {
+    window.open('https://www.youtube.com/watch?v=dQw4w9WgXcQ', '_blank');
+  }
+
+  // Click events for mobile/tap support
+  menuItems.forEach(li => {
+    li.addEventListener('click', () => {
+      mainIndex = parseInt(li.dataset.index);
+      selectMainItem(mainIndex);
+      handleMainEnter();
+    });
+  });
+  submenu.addEventListener('click', (e) => {
+    if (e.target.tagName === 'LI') {
+      const idx = parseInt(e.target.dataset.index);
+      openMediaLink(idx);
+    }
+  });
+
+  // Global key listener
+  document.addEventListener('keydown', handleKeyPress);
 </script>
 </body>
 </html>
