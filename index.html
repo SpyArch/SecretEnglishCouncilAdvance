@@ -4,32 +4,36 @@
 <meta charset="UTF-8">
 <title>Secret Menu</title>
 <style>
-* { box-sizing: border-box; margin:0; padding:0; }
+* { margin:0; padding:0; box-sizing:border-box; }
 html, body { height:100%; width:100%; font-family: monospace; background:#000; color:#fff; display:flex; align-items:center; justify-content:center; overflow:hidden; }
-#app { width:320px; height:56px; border:2px solid #fff; border-radius:28px; overflow:hidden; background:#000; display:flex; align-items:center; justify-content:center; transition: all 0.55s ease; position:relative; }
-#app.menu { width:88vw; max-width:980px; height:72vh; max-height:720px; border-radius:0; padding:12px; display:flex; }
+#app { width:320px; height:56px; border:2px solid #fff; border-radius:28px; background:#000; display:flex; align-items:center; justify-content:center; transition: all 0.5s ease; position:relative; }
+#app.menu { width:88vw; max-width:980px; height:72vh; max-height:720px; border-radius:0; padding:12px; display:flex; flex-direction:row; }
 #login-screen { width:100%; height:100%; display:flex; justify-content:center; align-items:center; }
-#password-input { width:86%; padding:10px 12px; font-size:18px; color:#fff; background:transparent; border:2px solid #fff; border-radius:28px; outline:none; text-align:center; caret-color:#fff; transition: all 0.3s ease; }
+#password-input { width:86%; padding:10px 12px; font-size:18px; color:#fff; background:transparent; border:2px solid #fff; border-radius:28px; outline:none; text-align:center; caret-color:#0ff; transition: all 0.3s ease; }
 #password-input:focus { border-color:#0ff; }
-#main-menu { display:flex; width:100%; height:100%; opacity:0; transform:scale(0.95); transition: all 0.5s ease; }
+#main-menu { display:flex; width:100%; height:100%; opacity:0; transform:scale(0.95); transition: all 0.5s ease; flex-direction:row; }
 #main-menu.visible { opacity:1; transform:scale(1); }
-#left-panel { width:260px; max-width:34%; min-width:160px; border-right:2px solid #fff; padding-right:12px; display:flex; flex-direction:column; gap:8px; }
+#left-panel { width:260px; max-width:34%; min-width:160px; border-right:2px solid #fff; display:flex; flex-direction:column; gap:6px; padding-right:12px; }
 .menu-item { padding:8px 6px; cursor:pointer; user-select:none; transition: background 0.25s ease; }
 .menu-item.selected::before { content:"> "; margin-right:6px; }
-#submenu-list { padding-left:20px; margin-top:10px; display:none; flex-direction:column; gap:4px; transition: all 0.4s ease; }
+#submenu-list { display:none; flex-direction:column; gap:4px; padding-left:20px; transition: all 0.3s ease; }
 .submenu-item { cursor:pointer; transition: background 0.25s ease; }
 .submenu-item.selected::before { content:"> "; margin-right:4px; }
 #content-panel { flex:1; padding-left:18px; overflow-y:auto; font-size:15px; transition: all 0.4s ease; opacity:0; }
 #content-panel.visible { opacity:1; }
 table { border-collapse:collapse; }
 th, td { border:1px solid #fff; padding:4px 8px; }
+@media (max-width:600px) { #left-panel { width:120px; } .menu-item, .submenu-item { font-size:14px; } }
 </style>
 </head>
 <body>
 <div id="app">
+  <!-- Login -->
   <div id="login-screen">
     <input type="password" id="password-input" placeholder="Enter password">
   </div>
+
+  <!-- Main Menu -->
   <div id="main-menu">
     <div id="left-panel">
       <div class="menu-item" data-index="0">BOUNTY</div>
@@ -64,6 +68,7 @@ th, td { border:1px solid #fff; padding:4px 8px; }
 </div>
 
 <script>
+// Config
 const CORRECT_PASSWORD = "@2#1#3$1#1%1#1^3%2(2*1@2^2#3(1&1^3#3*1(2!2#2$3!2^3#3#1#2";
 const mediaLinks = [
   {name:"DISCORD", url:"https://discord.gg/Bz2z7hqeb"},
@@ -71,11 +76,11 @@ const mediaLinks = [
   {name:"ROBLOX", url:"https://www.roblox.com/share/g/35306961"}
 ];
 const konamiCode = ["w","w","s","s","a","d","a","d","b","a","enter"];
+
 let keyBuffer = [];
+let loggedIn = false, mainIndex=0, subIndex=0, inSubmenu=false;
 
-let loggedIn = false;
-let mainIndex=0, subIndex=0, inSubmenu=false;
-
+// DOM
 const app = document.getElementById("app");
 const passwordInput = document.getElementById("password-input");
 const mainMenu = document.getElementById("main-menu");
@@ -85,83 +90,60 @@ const bountyContent = document.getElementById("bounty-content");
 const dictionaryContent = document.getElementById("dictionary-content");
 const contentPanel = document.getElementById("content-panel");
 
-function selectMainItem(index){
-  menuItems.forEach((li,i)=>li.classList.toggle("selected",i===index));
-}
-function selectSubItem(index){
-  const items = submenuList.querySelectorAll(".submenu-item");
-  items.forEach((li,i)=>li.classList.toggle("selected",i===index));
-}
-function clearSubmenu(){
-  submenuList.innerHTML="";
-  submenuList.style.display="none";
-  inSubmenu=false;
-  subIndex=0;
-}
-
-function showBounty(){clearSubmenu(); bountyContent.style.display="block"; dictionaryContent.style.display="none"; contentPanel.classList.add("visible");}
-function showDictionary(){clearSubmenu(); bountyContent.style.display="none"; dictionaryContent.style.display="block"; contentPanel.classList.add("visible");}
-function showMediaSubmenu(){
-  clearSubmenu();
-  mediaLinks.forEach((m,i)=>{
-    const li = document.createElement("div");
-    li.textContent=m.name;
-    li.className="submenu-item";
-    li.dataset.index=i;
-    li.addEventListener("click",()=>window.open(m.url,"_blank"));
-    submenuList.appendChild(li);
-  });
-  submenuList.style.display="flex";
-  inSubmenu=true;
-  subIndex=0;
-  selectSubItem(subIndex);
-  contentPanel.classList.add("visible");
+// Functions
+function selectMainItem(index){ menuItems.forEach((li,i)=>li.classList.toggle("selected",i===index)); }
+function selectSubItem(index){ const items=submenuList.querySelectorAll(".submenu-item"); items.forEach((li,i)=>li.classList.toggle("selected",i===index)); }
+function clearSubmenu(){ submenuList.innerHTML=""; submenuList.style.display="none"; inSubmenu=false; subIndex=0; }
+function showBounty(){ clearSubmenu(); bountyContent.style.display="block"; dictionaryContent.style.display="none"; contentPanel.classList.add("visible"); }
+function showDictionary(){ clearSubmenu(); bountyContent.style.display="none"; dictionaryContent.style.display="block"; contentPanel.classList.add("visible"); }
+function showMediaSubmenu(){ 
+  clearSubmenu(); 
+  mediaLinks.forEach((m,i)=>{ 
+    const li=document.createElement("div"); 
+    li.textContent=m.name; 
+    li.className="submenu-item"; 
+    li.dataset.index=i; 
+    li.addEventListener("click",()=>window.open(m.url,"_blank")); 
+    submenuList.appendChild(li); 
+  }); 
+  submenuList.style.display="flex"; 
+  inSubmenu=true; subIndex=0; selectSubItem(subIndex); contentPanel.classList.add("visible");
 }
 function handleMainEnter(){
   if(mainIndex===0) showBounty();
   else if(mainIndex===1) showMediaSubmenu();
   else if(mainIndex===2) showDictionary();
-  else if(mainIndex===3){ loggedIn=false; app.classList.remove("menu"); mainMenu.style.opacity=0; setTimeout(()=>{mainMenu.style.display="none"; document.getElementById("login-screen").style.display="flex"; passwordInput.focus(); clearSubmenu(); contentPanel.classList.remove("visible");},300);}
+  else if(mainIndex===3){ loggedIn=false; app.classList.remove("menu"); mainMenu.classList.remove("visible"); setTimeout(()=>{ mainMenu.style.display="none"; document.getElementById("login-screen").style.display="flex"; passwordInput.focus(); clearSubmenu(); contentPanel.classList.remove("visible"); },400); }
 }
 
 // Login
-passwordInput.addEventListener("keydown", e=>{
+passwordInput.addEventListener("keydown",e=>{
   if(e.key==="Enter"){
     if(passwordInput.value===CORRECT_PASSWORD){
-      loggedIn=true;
-      document.getElementById("login-screen").style.display="none";
-      mainMenu.style.display="flex";
-      setTimeout(()=>mainMenu.classList.add("visible"),10);
-      passwordInput.value="";
-      selectMainItem(mainIndex);
+      loggedIn=true; document.getElementById("login-screen").style.display="none"; mainMenu.style.display="flex"; setTimeout(()=>mainMenu.classList.add("visible"),10); passwordInput.value=""; selectMainItem(mainIndex);
     } else { alert("Incorrect password."); passwordInput.value=""; }
   }
 });
 
-// Navigation & Konami
-document.addEventListener("keydown", e=>{
+// Navigation + Konami
+document.addEventListener("keydown",e=>{
   if(!loggedIn) return;
   let key=e.key.toLowerCase();
-  if(key==="arrowup") key="w";
-  if(key==="arrowdown") key="s";
-  if(key==="arrowleft") key="a";
-  if(key==="arrowright") key="d";
+  if(key==="arrowup") key="w"; if(key==="arrowdown") key="s"; if(key==="arrowleft") key="a"; if(key==="arrowright") key="d";
 
-  keyBuffer.push(key);
-  if(keyBuffer.length>konamiCode.length) keyBuffer.shift();
-  if(keyBuffer.length===konamiCode.length && konamiCode.every((k,i)=>k===keyBuffer[i])){
-    window.open("https://www.youtube.com/watch?v=dQw4w9WgXcQ","_blank");
-    keyBuffer=[];
-  }
+  // Konami
+  keyBuffer.push(key); if(keyBuffer.length>konamiCode.length) keyBuffer.shift();
+  if(keyBuffer.length===konamiCode.length && konamiCode.every((k,i)=>k===keyBuffer[i])){ window.open("https://www.youtube.com/watch?v=dQw4w9WgXcQ","_blank"); keyBuffer=[]; }
 
-  if(key==="w"){ if(inSubmenu){if(subIndex>0) subIndex--; selectSubItem(subIndex);} else {if(mainIndex>0) mainIndex--; selectMainItem(mainIndex);} e.preventDefault();}
-  else if(key==="s"){ if(inSubmenu){if(subIndex<submenuList.querySelectorAll(".submenu-item").length-1) subIndex++; selectSubItem(subIndex);} else {if(mainIndex<menuItems.length-1) mainIndex++; selectMainItem(mainIndex);} e.preventDefault();}
-  else if(key==="a"){ if(inSubmenu){inSubmenu=false; clearSubmenu(); selectMainItem(mainIndex);} e.preventDefault();}
-  else if(key==="d"||key==="enter"){ if(inSubmenu){window.open(mediaLinks[subIndex].url,"_blank");} else handleMainEnter(); e.preventDefault();}
+  if(key==="w"){ if(inSubmenu){ if(subIndex>0) subIndex--; selectSubItem(subIndex); } else { if(mainIndex>0) mainIndex--; selectMainItem(mainIndex); } e.preventDefault(); }
+  else if(key==="s"){ if(inSubmenu){ if(subIndex<submenuList.querySelectorAll(".submenu-item").length-1) subIndex++; selectSubItem(subIndex); } else { if(mainIndex<menuItems.length-1) mainIndex++; selectMainItem(mainIndex); } e.preventDefault(); }
+  else if(key==="a"){ if(inSubmenu){ inSubmenu=false; clearSubmenu(); selectMainItem(mainIndex); } e.preventDefault(); }
+  else if(key==="d"||key==="enter"){ if(inSubmenu){ window.open(mediaLinks[subIndex].url,"_blank"); } else handleMainEnter(); e.preventDefault(); }
 });
 
-// Click events
+// Click
 menuItems.forEach(li=>li.addEventListener("click",()=>{ mainIndex=parseInt(li.dataset.index); selectMainItem(mainIndex); handleMainEnter(); }));
+
 </script>
 </body>
 </html>
