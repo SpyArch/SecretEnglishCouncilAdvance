@@ -4,291 +4,164 @@
 <meta charset="UTF-8">
 <title>Secret Menu</title>
 <style>
-  /* Basic reset */
-  * { box-sizing: border-box; margin: 0; padding: 0; }
-  html, body { height: 100%; width: 100%; }
-  body {
-    background: #000;
-    color: #fff;
-    font-family: monospace;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-  }
-
-  /* Container */
-  #app {
-    background: #000;
-    border: 2px solid #fff;
-    width: 300px;
-    height: 60px;
-    overflow: hidden;
-    transition: all 0.5s ease;
-    position: relative;
-  }
-  #app.menu {
-    width: 80vw;
-    max-width: 900px;
-    height: 80vh;
-    border-radius: 0px; /* Sharp corners */
-    display: flex;
-  }
-
-  /* Login screen */
-  #login-screen {
-    width: 100%;
-    height: 100%;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-  }
-  #password-input {
-    width: 80%;
-    padding: 10px;
-    font-size: 16px;
-    color: #fff;
-    background: transparent;
-    border: 2px solid #fff;
-    outline: none;
-    text-align: center;
-  }
-  #password-input::placeholder { color: #fff; opacity: 0.6; }
-
-  /* Main menu */
-  #main-menu {
-    width: 100%;
-    height: 100%;
-    display: flex;
-    opacity: 0;
-    transition: opacity 0.3s ease 0.5s;
-  }
-  #app.menu #main-menu { opacity: 1; }
-
-  #left-panel {
-    width: 200px;
-    min-width: 150px;
-    border-right: 2px solid #fff;
-    padding: 10px;
-  }
-  #menu-list, #submenu-list { list-style: none; }
-  #menu-list li, #submenu-list li {
-    padding: 5px 10px;
-    cursor: pointer;
-    position: relative;
-  }
-  #menu-list li.selected::before,
-  #submenu-list li.selected::before { content: "> "; color: #fff; position: absolute; left: 0; }
-
-  #content-panel {
-    flex: 1;
-    padding: 10px;
-    overflow-y: auto;
-  }
-
-  /* Tables */
-  table { border-collapse: collapse; width: 100%; }
-  th, td { border: 1px solid #fff; padding: 5px; text-align: left; }
-
-  /* Hidden */
-  .hidden { display: none; }
-
-  /* Submenu indent */
-  #submenu-list li { padding-left: 20px; }
-
-  /* Mobile */
-  @media(max-width:600px) {
-    #left-panel { width: 120px; }
-    #menu-list li, #submenu-list li { font-size: 14px; }
-  }
+* { box-sizing: border-box; margin:0; padding:0; }
+html, body { height:100%; width:100%; font-family: monospace; background:#000; color:#fff; display:flex; align-items:center; justify-content:center; overflow:hidden; }
+#app { width:320px; height:56px; border:2px solid #fff; border-radius:28px; overflow:hidden; background:#000; display:flex; align-items:center; justify-content:center; transition: all 0.55s ease; position:relative; }
+#app.menu { width:88vw; max-width:980px; height:72vh; max-height:720px; border-radius:0; padding:12px; display:flex; }
+#login-screen { width:100%; height:100%; display:flex; justify-content:center; align-items:center; }
+#password-input { width:86%; padding:10px 12px; font-size:18px; color:#fff; background:transparent; border:2px solid #fff; border-radius:28px; outline:none; text-align:center; caret-color:#fff; transition: all 0.3s ease; }
+#password-input:focus { border-color:#0ff; }
+#main-menu { display:flex; width:100%; height:100%; opacity:0; transform:scale(0.95); transition: all 0.5s ease; }
+#main-menu.visible { opacity:1; transform:scale(1); }
+#left-panel { width:260px; max-width:34%; min-width:160px; border-right:2px solid #fff; padding-right:12px; display:flex; flex-direction:column; gap:8px; }
+.menu-item { padding:8px 6px; cursor:pointer; user-select:none; transition: background 0.25s ease; }
+.menu-item.selected::before { content:"> "; margin-right:6px; }
+#submenu-list { padding-left:20px; margin-top:10px; display:none; flex-direction:column; gap:4px; transition: all 0.4s ease; }
+.submenu-item { cursor:pointer; transition: background 0.25s ease; }
+.submenu-item.selected::before { content:"> "; margin-right:4px; }
+#content-panel { flex:1; padding-left:18px; overflow-y:auto; font-size:15px; transition: all 0.4s ease; opacity:0; }
+#content-panel.visible { opacity:1; }
+table { border-collapse:collapse; }
+th, td { border:1px solid #fff; padding:4px 8px; }
 </style>
 </head>
 <body>
 <div id="app">
   <div id="login-screen">
-    <input type="password" id="password-input" placeholder="Enter Password">
+    <input type="password" id="password-input" placeholder="Enter password">
   </div>
-  <div id="main-menu" class="hidden">
+  <div id="main-menu">
     <div id="left-panel">
-      <ul id="menu-list">
-        <li data-index="0">BOUNTY</li>
-        <li data-index="1">MEDIA</li>
-        <li data-index="2">DICTIONARY</li>
-        <li data-index="3">EXIT</li>
-      </ul>
-      <ul id="submenu-list" class="hidden"></ul>
+      <div class="menu-item" data-index="0">BOUNTY</div>
+      <div class="menu-item" data-index="1">MEDIA</div>
+      <div class="menu-item" data-index="2">DICTIONARY</div>
+      <div class="menu-item" data-index="3">EXIT</div>
+      <div id="submenu-list"></div>
     </div>
     <div id="content-panel">
-      <div id="bounty-content" class="hidden">
+      <div id="bounty-content" style="display:none;">
         <table>
           <tr><th>Name</th><th>Bounty</th></tr>
-          <tr><td>Alice</td><td>$1,000</td></tr>
-          <tr><td>Bob</td><td>$750</td></tr>
-          <tr><td>Charlie</td><td>$500</td></tr>
+          <tr><td>Janna</td><td>$2,900,000,000</td></tr>
+          <tr><td>Sabrina</td><td>$2,400,000,000</td></tr>
+          <tr><td>Juan</td><td>$400,000,000</td></tr>
+          <tr><td>Angel</td><td>$1,700,000,000</td></tr>
+          <tr><td>Aubrey</td><td>$700,000,000</td></tr>
         </table>
       </div>
-      <div id="dictionary-content" class="hidden">
-        <pre>
-KuroSaru - (noun) A Japanese-inspired name meaning “Black Monkey”
-Kokujin - (noun) Japanese term meaning “black person”
-Airball - Filipino Starter Pack
-Gerald - Someone Black
-Janna - (slang) Someone fat
-Kevin - (slang) Something bad
-Owen - (slang) Something good
-Pica - Slovak insult, roughly equivalent to “bitch”
-        </pre>
+      <div id="dictionary-content" style="display:none;">
+        KuroSaru - (noun) A Japanese-inspired name meaning “Black Monkey”<br>
+        Kokujin - (noun) Japanese term meaning “black person”<br>
+        Airball - Filipino Starter Pack (also known as Feyleypenos)<br>
+        Gerald - Someone Black<br>
+        Janna - (slang'd-name) Someone fat<br>
+        Kevin - (slang'd-name) meaning "something bad"<br>
+        Owen - (slang'd-name) meaning "something good"<br>
+        Pica - (vulgar) Slovak insult, roughly equivalent to “bitch”
       </div>
     </div>
   </div>
 </div>
-<script>
-const PASSWORD = "@2#1#3$1#1%1#1^3%2(2*1@2^2#3(1&1^3#3*1(2!2#2$3!2^3#3#1#2";
-const menuList = document.querySelectorAll('#menu-list li');
-const submenuList = document.getElementById('submenu-list');
-const bountyContent = document.getElementById('bounty-content');
-const dictionaryContent = document.getElementById('dictionary-content');
-const loginScreen = document.getElementById('login-screen');
-const mainMenu = document.getElementById('main-menu');
-const app = document.getElementById('app');
-const passwordInput = document.getElementById('password-input');
 
+<script>
+const CORRECT_PASSWORD = "@2#1#3$1#1%1#1^3%2(2*1@2^2#3(1&1^3#3*1(2!2#2$3!2^3#3#1#2";
 const mediaLinks = [
-  {name:'DISCORD', url:'https://discord.com'},
-  {name:'INSTAGRAM', url:'https://instagram.com'},
-  {name:'ROBLOX', url:'https://www.roblox.com'}
+  {name:"DISCORD", url:"https://discord.gg/Bz2z7hqeb"},
+  {name:"INSTAGRAM", url:"https://www.instagram.com/secreteng_counciladvanced/"},
+  {name:"ROBLOX", url:"https://www.roblox.com/share/g/35306961"}
 ];
+const konamiCode = ["w","w","s","s","a","d","a","d","b","a","enter"];
+let keyBuffer = [];
 
 let loggedIn = false;
-let mainIndex = 0;
-let subIndex = 0;
-let inSubmenu = false;
-let keyBuffer = [];
-const konamiCode = ['w','w','s','s','a','d','a','d','b','a','enter'];
+let mainIndex=0, subIndex=0, inSubmenu=false;
 
-passwordInput.addEventListener('keydown', e => {
-  if(e.key === 'Enter'){
-    e.preventDefault();
-    if(passwordInput.value === PASSWORD){
-      loginScreen.classList.add('hidden');
-      mainMenu.classList.remove('hidden');
-      app.classList.add('menu');
-      passwordInput.value = '';
-      loggedIn = true;
-      selectMain(mainIndex);
-    } else {
-      alert("Incorrect password.");
-      passwordInput.value = '';
-    }
-  }
-});
+const app = document.getElementById("app");
+const passwordInput = document.getElementById("password-input");
+const mainMenu = document.getElementById("main-menu");
+const menuItems = document.querySelectorAll(".menu-item");
+const submenuList = document.getElementById("submenu-list");
+const bountyContent = document.getElementById("bounty-content");
+const dictionaryContent = document.getElementById("dictionary-content");
+const contentPanel = document.getElementById("content-panel");
 
-function selectMain(index){
-  menuList.forEach(li => li.classList.remove('selected'));
-  menuList[index].classList.add('selected');
-  showContent();
+function selectMainItem(index){
+  menuItems.forEach((li,i)=>li.classList.toggle("selected",i===index));
+}
+function selectSubItem(index){
+  const items = submenuList.querySelectorAll(".submenu-item");
+  items.forEach((li,i)=>li.classList.toggle("selected",i===index));
+}
+function clearSubmenu(){
+  submenuList.innerHTML="";
+  submenuList.style.display="none";
+  inSubmenu=false;
+  subIndex=0;
 }
 
-function selectSub(index){
-  const subItems = submenuList.querySelectorAll('li');
-  subItems.forEach(li => li.classList.remove('selected'));
-  if(subItems[index]) subItems[index].classList.add('selected');
-}
-
-function showContent(){
-  bountyContent.classList.add('hidden');
-  dictionaryContent.classList.add('hidden');
-  submenuList.classList.add('hidden');
-  submenuList.innerHTML = '';
-  inSubmenu = false;
-  subIndex = 0;
-  if(mainIndex === 0) bountyContent.classList.remove('hidden');
-  if(mainIndex === 2) dictionaryContent.classList.remove('hidden');
-  if(mainIndex === 1){
-    submenuList.classList.remove('hidden');
-    mediaLinks.forEach((m,idx)=>{
-      const li = document.createElement('li');
-      li.textContent = m.name;
-      li.dataset.index = idx;
-      submenuList.appendChild(li);
-    });
-    inSubmenu = true;
-    selectSub(subIndex);
-  }
-  if(mainIndex === 3) exitMenu();
-}
-
-function exitMenu(){
-  mainMenu.classList.add('hidden');
-  loginScreen.classList.remove('hidden');
-  app.classList.remove('menu');
-  loggedIn = false;
-  mainIndex = 0;
-  subIndex = 0;
-  inSubmenu = false;
-  keyBuffer = [];
-  passwordInput.focus();
-}
-
-function openMediaLink(idx){
-  window.open(mediaLinks[idx].url, '_blank');
-}
-
-menuList.forEach(li => {
-  li.addEventListener('click', ()=>{
-    mainIndex = parseInt(li.dataset.index);
-    selectMain(mainIndex);
+function showBounty(){clearSubmenu(); bountyContent.style.display="block"; dictionaryContent.style.display="none"; contentPanel.classList.add("visible");}
+function showDictionary(){clearSubmenu(); bountyContent.style.display="none"; dictionaryContent.style.display="block"; contentPanel.classList.add("visible");}
+function showMediaSubmenu(){
+  clearSubmenu();
+  mediaLinks.forEach((m,i)=>{
+    const li = document.createElement("div");
+    li.textContent=m.name;
+    li.className="submenu-item";
+    li.dataset.index=i;
+    li.addEventListener("click",()=>window.open(m.url,"_blank"));
+    submenuList.appendChild(li);
   });
-});
+  submenuList.style.display="flex";
+  inSubmenu=true;
+  subIndex=0;
+  selectSubItem(subIndex);
+  contentPanel.classList.add("visible");
+}
+function handleMainEnter(){
+  if(mainIndex===0) showBounty();
+  else if(mainIndex===1) showMediaSubmenu();
+  else if(mainIndex===2) showDictionary();
+  else if(mainIndex===3){ loggedIn=false; app.classList.remove("menu"); mainMenu.style.opacity=0; setTimeout(()=>{mainMenu.style.display="none"; document.getElementById("login-screen").style.display="flex"; passwordInput.focus(); clearSubmenu(); contentPanel.classList.remove("visible");},300);}
+}
 
-submenuList.addEventListener('click', e=>{
-  if(e.target.tagName==='LI'){
-    const idx = parseInt(e.target.dataset.index);
-    openMediaLink(idx);
+// Login
+passwordInput.addEventListener("keydown", e=>{
+  if(e.key==="Enter"){
+    if(passwordInput.value===CORRECT_PASSWORD){
+      loggedIn=true;
+      document.getElementById("login-screen").style.display="none";
+      mainMenu.style.display="flex";
+      setTimeout(()=>mainMenu.classList.add("visible"),10);
+      passwordInput.value="";
+      selectMainItem(mainIndex);
+    } else { alert("Incorrect password."); passwordInput.value=""; }
   }
 });
 
-document.addEventListener('keydown', e=>{
+// Navigation & Konami
+document.addEventListener("keydown", e=>{
   if(!loggedIn) return;
-  let k = e.key.toLowerCase();
-  if(k==='arrowup') k='w';
-  if(k==='arrowdown') k='s';
-  if(k==='arrowleft') k='a';
-  if(k==='arrowright') k='d';
+  let key=e.key.toLowerCase();
+  if(key==="arrowup") key="w";
+  if(key==="arrowdown") key="s";
+  if(key==="arrowleft") key="a";
+  if(key==="arrowright") key="d";
 
-  // Konami tracking
-  keyBuffer.push(k);
+  keyBuffer.push(key);
   if(keyBuffer.length>konamiCode.length) keyBuffer.shift();
-  if(keyBuffer.length===konamiCode.length && konamiCode.every((v,i)=>v===keyBuffer[i])){
-    window.open('https://www.youtube.com/watch?v=dQw4w9WgXcQ', '_blank');
+  if(keyBuffer.length===konamiCode.length && konamiCode.every((k,i)=>k===keyBuffer[i])){
+    window.open("https://www.youtube.com/watch?v=dQw4w9WgXcQ","_blank");
     keyBuffer=[];
   }
 
-  if(k==='w'){
-    if(inSubmenu){
-      if(subIndex>0) subIndex--; selectSub(subIndex);
-    } else { if(mainIndex>0) mainIndex--; selectMain(mainIndex); }
-    e.preventDefault();
-  }
-  if(k==='s'){
-    if(inSubmenu){
-      if(subIndex<submenuList.querySelectorAll('li').length-1) subIndex++; selectSub(subIndex);
-    } else { if(mainIndex<menuList.length-1) mainIndex++; selectMain(mainIndex); }
-    e.preventDefault();
-  }
-  if(k==='a'){
-    if(inSubmenu){
-      inSubmenu=false;
-      submenuList.classList.add('hidden');
-      selectMain(mainIndex);
-    }
-    e.preventDefault();
-  }
-  if(k==='d' || k==='enter'){
-    if(inSubmenu) openMediaLink(subIndex);
-    else showContent();
-    e.preventDefault();
-  }
+  if(key==="w"){ if(inSubmenu){if(subIndex>0) subIndex--; selectSubItem(subIndex);} else {if(mainIndex>0) mainIndex--; selectMainItem(mainIndex);} e.preventDefault();}
+  else if(key==="s"){ if(inSubmenu){if(subIndex<submenuList.querySelectorAll(".submenu-item").length-1) subIndex++; selectSubItem(subIndex);} else {if(mainIndex<menuItems.length-1) mainIndex++; selectMainItem(mainIndex);} e.preventDefault();}
+  else if(key==="a"){ if(inSubmenu){inSubmenu=false; clearSubmenu(); selectMainItem(mainIndex);} e.preventDefault();}
+  else if(key==="d"||key==="enter"){ if(inSubmenu){window.open(mediaLinks[subIndex].url,"_blank");} else handleMainEnter(); e.preventDefault();}
 });
+
+// Click events
+menuItems.forEach(li=>li.addEventListener("click",()=>{ mainIndex=parseInt(li.dataset.index); selectMainItem(mainIndex); handleMainEnter(); }));
 </script>
 </body>
 </html>
