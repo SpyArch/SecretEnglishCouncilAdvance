@@ -4,7 +4,6 @@
 <meta charset="UTF-8">
 <title>Secret Menu</title>
 <style>
-  /* Basic reset and body style */
   * { box-sizing: border-box; margin: 0; padding: 0; }
   html, body { height: 100%; width: 100%; }
   body {
@@ -53,20 +52,16 @@
     color: #fff;
     opacity: 0.7;
   }
-  #login-button {
-    display: none;
-  }
+  #login-button { display: none; }
   /* Main menu */
   #main-menu {
     display: flex;
     width: 100%;
     height: 100%;
     opacity: 0;
-    transition: opacity 0.3s ease 0.6s; /* fade in after expansion */
+    transition: opacity 0.3s ease 0.6s;
   }
-  #app.menu #main-menu {
-    opacity: 1;
-  }
+  #app.menu #main-menu { opacity: 1; }
   #left-panel {
     width: 200px;
     min-width: 150px;
@@ -75,52 +70,15 @@
     padding: 10px;
     overflow-y: auto;
   }
-  #menu-list, #submenu-list {
-    list-style: none;
-  }
-  #menu-list li, #submenu-list li {
-    padding: 5px 10px;
-    cursor: pointer;
-    position: relative;
-  }
-  #menu-list li.selected, #submenu-list li.selected {
-    background-color: #333;
-  }
-  /* Arrow indicator */
-  #menu-list li::before, #submenu-list li::before {
-    content: "";
-    display: inline-block;
-    width: 20px;
-  }
-  #menu-list li.selected::before, #submenu-list li.selected::before {
-    content: ">";
-    color: #fff;
-  }
-  /* Content panel */
-  #content-panel {
-    flex: 1;
-    padding: 10px;
-    overflow-y: auto;
-    position: relative;
-  }
-  /* Bounty table */
-  #bounty-table {
-    width: 100%;
-    border-collapse: collapse;
-  }
-  #bounty-table th, #bounty-table td {
-    border: 1px solid #fff;
-    padding: 5px 10px;
-    text-align: left;
-  }
-  /* Typing animation */
-  .typing {
-    font-family: "Courier New", Courier, monospace;
-    white-space: pre-wrap;
-  }
-  /* Hide content sections by default */
+  #menu-list, #submenu-list { list-style: none; }
+  #menu-list li, #submenu-list li { padding: 5px 10px; cursor: pointer; position: relative; }
+  #menu-list li.selected, #submenu-list li.selected { background-color: #333; }
+  #menu-list li::before, #submenu-list li::before { content: ""; display: inline-block; width: 20px; }
+  #menu-list li.selected::before, #submenu-list li.selected::before { content: ">"; color: #fff; }
+  #content-panel { flex: 1; padding: 10px; overflow-y: auto; position: relative; }
+  #bounty-table { width: 100%; border-collapse: collapse; }
+  #bounty-table th, #bounty-table td { border: 1px solid #fff; padding: 5px 10px; text-align: left; }
   .hidden { display: none; }
-  /* Mobile styles */
   @media (max-width: 600px) {
     #left-panel { width: 120px; }
     #menu-list li, #submenu-list li { font-size: 14px; padding: 5px; }
@@ -129,16 +87,13 @@
 </head>
 <body>
 <div id="app">
-  <!-- Login Screen -->
   <div id="login-screen">
     <form id="login-form">
       <input type="password" id="password-input" placeholder="Enter Password" required autofocus>
       <button type="submit" id="login-button">Enter</button>
     </form>
   </div>
-  <!-- Main Menu (hidden until login) -->
   <div id="main-menu" class="hidden">
-    <!-- Left navigation panel -->
     <div id="left-panel">
       <ul id="menu-list">
         <li data-index="0">BOUNTY</li>
@@ -146,280 +101,162 @@
         <li data-index="2">DICTIONARY</li>
         <li data-index="3">EXIT</li>
       </ul>
-      <ul id="submenu-list" class="hidden">
-        <!-- Submenu items (populated dynamically) -->
-      </ul>
+      <ul id="submenu-list" class="hidden"></ul>
     </div>
-    <!-- Content panel -->
     <div id="content-panel">
       <div id="bounty-content" class="hidden">
         <table id="bounty-table">
           <tr><th>Name</th><th>Bounty</th></tr>
-          <tr><td>Alice</td><td>$1000</td></tr>
-          <tr><td>Bob</td><td>$750</td></tr>
-          <tr><td>Charlie</td><td>$500</td></tr>
+          <tr><td>Janna</td><td>$2,900,000,000</td></tr>
+          <tr><td>Sabrina</td><td>$2,400,000,000</td></tr>
+          <tr><td>Juan</td><td>$400,000,000</td></tr>
+          <tr><td>Angel</td><td>$1,700,000,000</td></tr>
+          <tr><td>Aubrey</td><td>$700,000,000</td></tr>
         </table>
       </div>
       <div id="dictionary-content" class="hidden">
-        <div id="dictionary-text" class="typing"></div>
+        <pre>
+KuroSaru - (noun) A Japanese-inspired name meaning “Black Monkey”
+Kokujin - (noun) Japanese term meaning “black person”
+Airball - Filipino Starter Pack (also known as Feyleypenos)
+Gerald - Someone Black
+Janna - (slang'd-name) Someone fat
+Kevin - (slang'd-name) Kevin is a slang term meaning "something bad"
+Owen - (slang'd-name) meaning "something good"
+Pica - (vulgar) Slovak insult, roughly equivalent to “bitch”
+        </pre>
       </div>
     </div>
   </div>
 </div>
 <script>
-  // State variables
-  let loggedIn = false;
-  let mainIndex = 0;
-  let subIndex = 0;
-  let inSubmenu = false;
-  const keyBuffer = [];
-  const konamiCode = ['w','w','s','s','a','d','a','d','b','a','enter'];
+let loggedIn = false;
+let mainIndex = 0;
+let subIndex = 0;
+let inSubmenu = false;
+const keyBuffer = [];
+const konamiCode = ['w','w','s','s','a','d','a','d','b','a','enter'];
 
-  // DOM elements
-  const loginForm = document.getElementById('login-form');
-  const passwordInput = document.getElementById('password-input');
-  const app = document.getElementById('app');
-  const loginScreen = document.getElementById('login-screen');
-  const mainMenu = document.getElementById('main-menu');
-  const menuItems = document.querySelectorAll('#menu-list li');
-  const submenu = document.getElementById('submenu-list');
-  const contentPanel = document.getElementById('content-panel');
-  const bountyContent = document.getElementById('bounty-content');
-  const dictionaryContent = document.getElementById('dictionary-content');
-  const dictionaryText = document.getElementById('dictionary-text');
+const loginForm = document.getElementById('login-form');
+const passwordInput = document.getElementById('password-input');
+const app = document.getElementById('app');
+const loginScreen = document.getElementById('login-screen');
+const mainMenu = document.getElementById('main-menu');
+const menuItems = document.querySelectorAll('#menu-list li');
+const submenu = document.getElementById('submenu-list');
 
-  // Media links for MEDIA submenu
-  const mediaLinks = [
-    { name: 'DISCORD', url: 'https://discord.com' },
-    { name: 'INSTAGRAM', url: 'https://instagram.com' },
-    { name: 'ROBLOX', url: 'https://www.roblox.com' }
-  ];
+const mediaLinks = [
+  { name: 'DISCORD', url: 'https://discord.com' },
+  { name: 'INSTAGRAM', url: 'https://instagram.com' },
+  { name: 'ROBLOX', url: 'https://www.roblox.com' }
+];
 
-  // Dictionary content lines
-  const dictionaryStrings = ["cryptography: the art of writing or solving codes. It ensures the confidentiality and integrity of messages by transforming information into secret codes. This is often used to protect data and secure communication.", "\nencryption: the process of converting information or data into a code, especially to prevent unauthorized access."];
-  let dictInterval;
+function openMenu() {
+  loggedIn = true;
+  app.classList.add('menu');
+  loginScreen.classList.add('hidden');
+  mainMenu.classList.remove('hidden');
+  passwordInput.blur();
+  passwordInput.value = "";
+  mainIndex = 0;
+  selectMainItem(mainIndex);
+}
 
-  // Handle login
-  loginForm.addEventListener('submit', (e) => {
-    e.preventDefault();
-    if (passwordInput.value === "S3cr3t_P@ssw0rd!2025") {
-      openMenu();
-    } else {
-      alert("Incorrect password.");
-      passwordInput.value = "";
-    }
+function exitMenu() {
+  loggedIn = false;
+  app.classList.remove('menu');
+  loginScreen.classList.remove('hidden');
+  mainMenu.classList.add('hidden');
+  passwordInput.focus();
+  mainIndex = 0;
+  subIndex = 0;
+  inSubmenu = false;
+  keyBuffer.length = 0;
+  menuItems.forEach(li => li.classList.remove('selected'));
+  submenu.classList.add('hidden');
+  submenu.innerHTML = "";
+}
+
+function selectMainItem(idx) {
+  menuItems.forEach(li => li.classList.remove('selected'));
+  menuItems[idx].classList.add('selected');
+}
+
+function selectSubItem(idx) {
+  const subItems = submenu.querySelectorAll('li');
+  subItems.forEach(li => li.classList.remove('selected'));
+  subItems[idx].classList.add('selected');
+}
+
+function showMediaSubmenu() {
+  submenu.innerHTML = "";
+  mediaLinks.forEach((link, idx) => {
+    const li = document.createElement('li');
+    li.textContent = link.name;
+    li.dataset.index = idx;
+    submenu.appendChild(li);
   });
+  submenu.classList.remove('hidden');
+  inSubmenu = true;
+  subIndex = 0;
+  menuItems[mainIndex].classList.remove('selected');
+  selectSubItem(subIndex);
+}
 
-  function openMenu() {
-    loggedIn = true;
-    app.classList.add('menu');
-    loginScreen.classList.add('hidden');
-    mainMenu.classList.remove('hidden');
-    passwordInput.blur();
+function openMediaLink(idx) {
+  window.open(mediaLinks[idx].url, '_blank');
+}
+
+loginForm.addEventListener('submit', (e) => {
+  e.preventDefault();
+  if (passwordInput.value === "@2#1#3$1#1%1#1^3%2(2*1@2^2#3(1&1^3#3*1(2!2#2$3!2^3#3#1#2") {
+    openMenu();
+  } else {
+    alert("Incorrect password.");
     passwordInput.value = "";
-    mainIndex = 0;
-    selectMainItem(mainIndex);
   }
+});
 
-  // Arrow selection functions
-  function selectMainItem(index) {
-    // Deselect all main menu items
-    menuItems.forEach(li => li.classList.remove('selected'));
-    // Select current item
-    menuItems[index].classList.add('selected');
-  }
-
-  function selectSubItem(index) {
-    const subItems = submenu.querySelectorAll('li');
-    subItems.forEach(li => li.classList.remove('selected'));
-    subItems[index].classList.add('selected');
-  }
-
-  // Display functions
-  function clearContent() {
-    // Hide content panels
-    bountyContent.classList.add('hidden');
-    dictionaryContent.classList.add('hidden');
-    // Clear dictionary typing
-    clearInterval(dictInterval);
-    dictionaryText.textContent = "";
-    // Hide and clear submenu
-    submenu.classList.add('hidden');
-    submenu.innerHTML = "";
-    // Reset submenu state
-    inSubmenu = false;
-    subIndex = 0;
-  }
-
-  function showBounty() {
-    clearContent();
-    bountyContent.classList.remove('hidden');
-  }
-
-  function showDictionary() {
-    clearContent();
-    dictionaryContent.classList.remove('hidden');
-    typeDictionary();
-  }
-
-  function showMediaSubmenu() {
-    clearContent();
-    // Populate submenu with media links
-    mediaLinks.forEach((link, idx) => {
-      const li = document.createElement('li');
-      li.textContent = link.name;
-      li.dataset.index = idx;
-      submenu.appendChild(li);
-    });
-    submenu.classList.remove('hidden');
-    // Set submenu state
-    inSubmenu = true;
-    subIndex = 0;
-    // Deselect main menu arrow
-    menuItems[mainIndex].classList.remove('selected');
-    selectSubItem(subIndex);
-  }
-
-  function exitMenu() {
-    clearContent();
-    mainMenu.classList.add('hidden');
-    loginScreen.classList.remove('hidden');
-    app.classList.remove('menu');
-    loggedIn = false;
-    // Reset main menu selection
-    menuItems.forEach(li => li.classList.remove('selected'));
-    mainIndex = 0;
-    // Clear key buffer
+document.addEventListener('keydown', (e) => {
+  if (!loggedIn) return;
+  let key = e.key.toLowerCase();
+  if (key === 'arrowup') key='w';
+  if (key === 'arrowdown') key='s';
+  if (key === 'arrowleft') key='a';
+  if (key === 'arrowright') key='d';
+  // Konami code
+  keyBuffer.push(key);
+  if (keyBuffer.length > konamiCode.length) keyBuffer.shift();
+  if (keyBuffer.length === konamiCode.length && konamiCode.every((k,i)=>keyBuffer[i]===k)) {
+    window.open('https://www.youtube.com/watch?v=dQw4w9WgXcQ','_blank');
     keyBuffer.length = 0;
-    passwordInput.focus();
   }
-
-  function typeDictionary() {
-    dictionaryText.textContent = "";
-    let fullText = dictionaryStrings.join('');
-    let i = 0;
-    dictInterval = setInterval(() => {
-      if (i < fullText.length) {
-        dictionaryText.textContent += fullText.charAt(i);
-        i++;
-      } else {
-        clearInterval(dictInterval);
-      }
-    }, 40);
+  // Navigation
+  if (key==='w'){
+    if(inSubmenu && subIndex>0) subIndex--, selectSubItem(subIndex);
+    else if(!inSubmenu && mainIndex>0) mainIndex--, selectMainItem(mainIndex);
+    e.preventDefault();
   }
-
-  function openMediaLink(idx) {
-    window.open(mediaLinks[idx].url, '_blank');
+  if (key==='s'){
+    if(inSubmenu && subIndex<submenu.querySelectorAll('li').length-1) subIndex++, selectSubItem(subIndex);
+    else if(!inSubmenu && mainIndex<menuItems.length-1) mainIndex++, selectMainItem(mainIndex);
+    e.preventDefault();
   }
+  if (key==='a' && inSubmenu) { inSubmenu=false; submenu.classList.add('hidden'); menuItems[mainIndex].classList.add('selected'); e.preventDefault();}
+  if (key==='d') { if(!inSubmenu) handleMainEnter(); e.preventDefault();}
+  if (key==='enter') { if(inSubmenu) openMediaLink(subIndex); else handleMainEnter(); e.preventDefault();}
+});
 
-  // Handle navigation keypresses
-  function handleKeyPress(e) {
-    if (!loggedIn) return;
-    let key = e.key.toLowerCase();
-    if (key === 'arrowup') key = 'w';
-    if (key === 'arrowdown') key = 's';
-    if (key === 'arrowleft') key = 'a';
-    if (key === 'arrowright') key = 'd';
-    trackKonami(key);
-    if (key === 'w') {
-      // Up
-      if (inSubmenu) {
-        if (subIndex > 0) {
-          subIndex--;
-          selectSubItem(subIndex);
-        }
-      } else {
-        if (mainIndex > 0) {
-          mainIndex--;
-          selectMainItem(mainIndex);
-        }
-      }
-      e.preventDefault();
-    } else if (key === 's') {
-      // Down
-      if (inSubmenu) {
-        if (subIndex < submenu.querySelectorAll('li').length - 1) {
-          subIndex++;
-          selectSubItem(subIndex);
-        }
-      } else {
-        if (mainIndex < menuItems.length - 1) {
-          mainIndex++;
-          selectMainItem(mainIndex);
-        }
-      }
-      e.preventDefault();
-    } else if (key === 'a') {
-      // Left
-      if (inSubmenu) {
-        // Exit submenu to main
-        inSubmenu = false;
-        submenu.classList.add('hidden');
-        submenu.querySelectorAll('li').forEach(li => li.classList.remove('selected'));
-        selectMainItem(mainIndex);
-      }
-      e.preventDefault();
-    } else if (key === 'd') {
-      // Right acts like enter on main menu
-      if (!inSubmenu) {
-        handleMainEnter();
-      }
-      e.preventDefault();
-    } else if (key === 'enter') {
-      if (inSubmenu) {
-        openMediaLink(subIndex);
-      } else {
-        handleMainEnter();
-      }
-      e.preventDefault();
-    }
-  }
+function handleMainEnter(){
+  if(mainIndex===0) { document.getElementById('bounty-content').classList.remove('hidden'); submenu.classList.add('hidden'); inSubmenu=false; }
+  if(mainIndex===1) showMediaSubmenu();
+  if(mainIndex===2) { document.getElementById('dictionary-content').classList.remove('hidden'); submenu.classList.add('hidden'); inSubmenu=false;}
+  if(mainIndex===3) exitMenu();
+}
 
-  function handleMainEnter() {
-    if (mainIndex === 0) {
-      showBounty();
-    } else if (mainIndex === 1) {
-      showMediaSubmenu();
-    } else if (mainIndex === 2) {
-      showDictionary();
-    } else if (mainIndex === 3) {
-      exitMenu();
-    }
-  }
-
-  // Konami code tracker
-  function trackKonami(key) {
-    keyBuffer.push(key);
-    if (keyBuffer.length > konamiCode.length) {
-      keyBuffer.shift();
-    }
-    if (keyBuffer.length === konamiCode.length && konamiCode.every((k, idx) => keyBuffer[idx] === k)) {
-      triggerRickRoll();
-      keyBuffer.length = 0;
-    }
-  }
-
-  function triggerRickRoll() {
-    window.open('https://www.youtube.com/watch?v=dQw4w9WgXcQ', '_blank');
-  }
-
-  // Click events for mobile/tap support
-  menuItems.forEach(li => {
-    li.addEventListener('click', () => {
-      mainIndex = parseInt(li.dataset.index);
-      selectMainItem(mainIndex);
-      handleMainEnter();
-    });
-  });
-  submenu.addEventListener('click', (e) => {
-    if (e.target.tagName === 'LI') {
-      const idx = parseInt(e.target.dataset.index);
-      openMediaLink(idx);
-    }
-  });
-
-  // Global key listener
-  document.addEventListener('keydown', handleKeyPress);
+// Clicks
+menuItems.forEach(li=>li.addEventListener('click',()=>{mainIndex=parseInt(li.dataset.index);selectMainItem(mainIndex);handleMainEnter();}));
+submenu.addEventListener('click',(e)=>{if(e.target.tagName==='LI') openMediaLink(parseInt(e.target.dataset.index));});
 </script>
 </body>
 </html>
